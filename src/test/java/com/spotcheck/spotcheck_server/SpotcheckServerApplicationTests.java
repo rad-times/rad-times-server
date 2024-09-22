@@ -1,0 +1,13 @@
+package com.spotcheck.spotcheck_server;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class SpotcheckServerApplicationTests {
+
+	@Test
+	void contextLoads() {
+	}
+
+}
