@@ -14,8 +14,9 @@ public class Geolocation {
     @GeneratedValue
     private Integer location_id;
 
-    private Integer lat;
-    private Integer lng;
+    private Double lat;
+    private Double lng;
+
     private String city_name;
     private String street_number;
     private String street_name;
@@ -23,4 +24,3 @@ public class Geolocation {
     private String country_name;
     private String postal_code;
 }
-
