@@ -8,6 +8,15 @@ type Query {
     crewByPersonId(id: ID): [Person]
 }
 
+type Mutation {
+    toggleSpotFavorite(spotId: ID, personId:ID, isFavorite: Boolean): SpotInstance
+}
+
+type Void {
+    status: Int
+    message: String
+}
+
 type Person {
     id: ID!
     first_name: String!

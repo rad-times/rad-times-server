@@ -26,6 +26,7 @@ public class Spot {
     private Integer popularity_rating_count;
     private Boolean is_public;
     private Boolean is_private;
+    private Boolean is_favorite;
 
     @OneToOne
     @JoinColumn(name="location_id", referencedColumnName="location_id")
