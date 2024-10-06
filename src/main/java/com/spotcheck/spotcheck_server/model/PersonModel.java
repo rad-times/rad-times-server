@@ -22,6 +22,10 @@ public class PersonModel {
 
     private Boolean is_favorite;
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval=true)
+    @JoinColumn(name = "person_id", referencedColumnName = "id")
+    private Set<SocialMediaLinks> socials;
+
     @OneToOne
     @JoinColumn(name="location_id", referencedColumnName="location_id")
     private Geolocation location;

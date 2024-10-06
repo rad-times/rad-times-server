@@ -27,6 +27,7 @@ type Person {
     bio: String
     profile_image: String
     is_favorite: Boolean
+    socials: [SocialMedia]
     location: Geolocation
     crew: [Person]
 }
@@ -60,4 +61,10 @@ type SpotKeyword {
     keyword_id: Int!
     keyword_name: String!
     description: String
+}
+
+type SocialMedia {
+    id: Int!
+    social_type: String!
+    url_link: String!
 }
