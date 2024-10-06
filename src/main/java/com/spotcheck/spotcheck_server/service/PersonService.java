@@ -1,41 +1,62 @@
 package com.spotcheck.spotcheck_server.service;
 
+import com.spotcheck.spotcheck_server.model.FavoriteCrew;
 import com.spotcheck.spotcheck_server.model.PersonModel;
+import com.spotcheck.spotcheck_server.repository.FavoriteCrewRespository;
 import com.spotcheck.spotcheck_server.repository.PersonRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class PersonService {
     private final PersonRepository personRepository;
+    private final CrewService crewService;
+    private final FavoriteCrewRespository favoriteCrewRespository;
 
-    public PersonService(PersonRepository personRepository) {
+    public PersonService(PersonRepository personRepository, FavoriteCrewRespository favoriteCrewRespository, CrewService crewService) {
         this.personRepository = personRepository;
+        this.crewService = crewService;
+        this.favoriteCrewRespository = favoriteCrewRespository;
     }
-
-    public PersonModel createPerson(PersonModel player) {
+    /**
+     * Gets the user data for the person using the application
+     */
+    public Optional<PersonModel> getActivePersonById(Integer id) {
         try {
-            return personRepository.save(player);
+            Optional<PersonModel> matchingPerson = personRepository.findById(id);
+            if (matchingPerson.isPresent()) {
+                PersonModel person = matchingPerson.get();
+                Optional<Set<PersonModel>> crewRequest = crewService.getCrewByPersonId(id);
+
+                if (crewRequest.isPresent()) {
+                    Set<PersonModel> crewList = crewRequest.get();
+                    Optional<Set<FavoriteCrew>> favoritesReq = favoriteCrewRespository.getAllFavoritesByActiveUserId(person.getId());
+                    if (favoritesReq.isPresent()) {
+                        Set<Integer> favoriteIds = favoritesReq.stream().flatMap(fv -> fv.stream().map(FavoriteCrew::getFavorite_id)).collect(Collectors.toSet());
+                        crewList.forEach(personModel -> {
+                            personModel.setIs_favorite(favoriteIds.contains(personModel.getId()));
+                        });
+                    }
+                }
+
+                person.setCrew(crewRequest.orElseGet(Set::of));
+            }
+
+            return matchingPerson;
+
         } catch (Exception e) {
             // Handle exception or log the error
-            throw new RuntimeException("Failed to save player: " + e.getMessage());
+            throw new RuntimeException("Failed to fetch player by ID: " + e.getMessage());
         }
     }
-
-    // Get all products
-    public List<PersonModel> getAllPlayers() {
-        try {
-            return personRepository.findAll();
-        } catch (Exception e) {
-            // Handle exception or log the error
-            throw new RuntimeException("Failed to fetch all players: " + e.getMessage());
-        }
-    }
-
-    // Get a product by ID
-    public Optional<PersonModel> getPlayerById(Integer id) {
+    /**
+     * Get a person by ID
+     */
+    public Optional<PersonModel> getPersonById(Integer id) {
         try {
             return personRepository.findById(id);
         } catch (Exception e) {
@@ -43,37 +64,44 @@ public class PersonService {
             throw new RuntimeException("Failed to fetch player by ID: " + e.getMessage());
         }
     }
-
-    public Optional<PersonModel> updatePlayer(Integer id, PersonModel updatedPlayer) {
-        try {
-            Optional<PersonModel> existingPlayerOptional = personRepository.findById(id);
-            if (existingPlayerOptional.isPresent()) {
-                PersonModel existingProduct = existingPlayerOptional.get();
-                existingProduct.setFirst_name(updatedPlayer.getFirst_name());
-                existingProduct.setLast_name(updatedPlayer.getLast_name());
-                existingProduct.setEmail_address(updatedPlayer.getEmail_address());
-                PersonModel savedEntity = personRepository.save(existingProduct);
-                return Optional.of(savedEntity);
-            } else {
-                return Optional.empty();
-            }
-        } catch (Exception e) {
-            // Handle exception or log the error
-            throw new RuntimeException("Failed to update player: " + e.getMessage());
-        }
-    }
-
-    public boolean deletePlayer(Integer id) {
-        try {
-            personRepository.deleteById(id);
-            return true;
-        } catch (Exception e) {
-            // Handle exception or log the error
-            throw new RuntimeException("Failed to delete player: " + e.getMessage());
-        }
-    }
-
+    /**
+     * Returns all persons matching the name param
+     */
     public Optional<List<PersonModel>> searchPersonsByName(String nameToMatch) {
         return personRepository.searchByPersonNameLike(nameToMatch);
+    }
+    /**
+     * Sets 'personId' as a favorite friend of the active user
+     */
+    public Optional<PersonModel> togglePersonFavorite(Integer personId, Integer activeUserId, boolean isFavorite) {
+        try {
+            Optional<PersonModel> personRequest = this.getPersonById(personId);
+
+            if (personRequest.isEmpty()) {
+                return Optional.empty();
+            }
+
+            PersonModel person = personRequest.get();
+            Optional<FavoriteCrew> personInFavoriteList = favoriteCrewRespository.getFavoritePersonListing(activeUserId, personId);
+
+            if (personInFavoriteList.isPresent() && !isFavorite) {
+                favoriteCrewRespository.delete(personInFavoriteList.get());
+                person.setIs_favorite(false);
+            } else if (personInFavoriteList.isEmpty() && isFavorite) {
+                FavoriteCrew newFavorite = new FavoriteCrew();
+                newFavorite.setPrimary_id(activeUserId);
+                newFavorite.setFavorite_id(personId);
+                favoriteCrewRespository.save(newFavorite);
+                person.setIs_favorite(true);
+            } else {
+                person.setIs_favorite(isFavorite);
+            }
+
+            return personRequest;
+
+        } catch (Exception e) {
+            // Handle exception or log the error
+            throw new RuntimeException("Failed to set person as favorite: " + e.getMessage());
+        }
     }
 }

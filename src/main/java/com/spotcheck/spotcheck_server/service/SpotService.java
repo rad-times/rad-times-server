@@ -1,12 +1,9 @@
 package com.spotcheck.spotcheck_server.service;
 
 import com.spotcheck.spotcheck_server.model.FavoriteSpot;
-import com.spotcheck.spotcheck_server.model.GenericGraphQLResponse;
 import com.spotcheck.spotcheck_server.model.Spot;
 import com.spotcheck.spotcheck_server.repository.FavoriteSpotRepository;
 import com.spotcheck.spotcheck_server.repository.SpotRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -69,7 +66,7 @@ public class SpotService {
         }
     }
 
-    public Optional<Spot> toggleSpotFavorite(Integer spotId, Integer personId, Boolean isFavorite) {
+    public Optional<Spot> toggleSpotFavorite(Integer spotId, Integer activeUserId, Boolean isFavorite) {
         try {
             Optional<Spot> spotRequest = getSpotById(spotId);
 
@@ -78,7 +75,7 @@ public class SpotService {
             }
 
             Spot spot = spotRequest.get();
-            Optional<FavoriteSpot> spotInFavoriteList = favoriteSpotRepository.findBySpotAndPersonId(spotId, personId);
+            Optional<FavoriteSpot> spotInFavoriteList = favoriteSpotRepository.findBySpotAndPersonId(spotId, activeUserId);
 
             if (spotInFavoriteList.isPresent() && !isFavorite) {
                 favoriteSpotRepository.delete(spotInFavoriteList.get());
@@ -86,7 +83,7 @@ public class SpotService {
             } else if (spotInFavoriteList.isEmpty() && isFavorite) {
                 FavoriteSpot newFavorite = new FavoriteSpot();
                 newFavorite.setSpot_id(spotId);
-                newFavorite.setPerson_id(personId);
+                newFavorite.setPerson_id(activeUserId);
                 favoriteSpotRepository.save(newFavorite);
                 spot.setIs_favorite(true);
             } else {

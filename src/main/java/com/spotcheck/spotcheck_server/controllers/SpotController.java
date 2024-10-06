@@ -40,7 +40,7 @@ public class SpotController {
     }
 
     @MutationMapping
-    public Optional<Spot> toggleSpotFavorite(@Argument Integer spotId, @Argument Integer personId, @Argument Boolean isFavorite) {
-        return spotService.toggleSpotFavorite(spotId, personId, isFavorite);
+    public Optional<Spot> toggleSpotFavorite(@Argument Integer spotId, @Argument Integer activeUserId, @Argument Boolean isFavorite) {
+        return spotService.toggleSpotFavorite(spotId, activeUserId, isFavorite);
     }
 }

@@ -20,15 +20,12 @@ public class PersonModel {
     private Integer status;
     private String profile_image;
 
+    private Boolean is_favorite;
+
     @OneToOne
     @JoinColumn(name="location_id", referencedColumnName="location_id")
     private Geolocation location;
 
     @ManyToMany
-    @JoinTable(
-            name = "crew",
-            joinColumns = @JoinColumn(name="person_one"),
-            inverseJoinColumns = @JoinColumn(name="person_two")
-    )
     private Set<PersonModel> crew;
 }

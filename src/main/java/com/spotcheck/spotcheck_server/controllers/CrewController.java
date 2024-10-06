@@ -3,6 +3,7 @@ package com.spotcheck.spotcheck_server.controllers;
 import com.spotcheck.spotcheck_server.model.PersonModel;
 import com.spotcheck.spotcheck_server.service.CrewService;
 import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 

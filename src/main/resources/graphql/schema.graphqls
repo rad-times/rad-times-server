@@ -1,15 +1,17 @@
 type Query {
-    personById(id: ID): Person
+    personById(id: Int): Person
+    activePersonById(id: Int): Person
     searchPersonsByName(nameToMatch: String): [Person]
-    spotById(id: ID): SpotInstance
+    spotById(id: Int): SpotInstance
     spotByName(nameToMatch: String): [SpotInstance]
     spotByFavoriteOnly: [SpotInstance]
     spotByPrivateOnly: [SpotInstance]
-    crewByPersonId(id: ID): [Person]
+    crewByPersonId(id: Int): [Person]
 }
 
 type Mutation {
-    toggleSpotFavorite(spotId: ID, personId:ID, isFavorite: Boolean): SpotInstance
+    toggleSpotFavorite(spotId: Int, activeUserId:ID, isFavorite: Boolean): SpotInstance
+    togglePersonFavorite(personId: Int, activeUserId: ID, isFavorite: Boolean): Person
 }
 
 type Void {
@@ -18,18 +20,19 @@ type Void {
 }
 
 type Person {
-    id: ID!
-    first_name: String!
-    last_name: String!
+    id: Int!
+    first_name: String
+    last_name: String
     email_address: String
-    bio: String!
+    bio: String
     profile_image: String
+    is_favorite: Boolean
     location: Geolocation
     crew: [Person]
 }
 
 type Geolocation {
-    location_id: ID!
+    location_id: Int!
     lat: Float
     lng: Float
     street_number: String
@@ -41,7 +44,7 @@ type Geolocation {
 }
 
 type SpotInstance {
-    spot_id: ID!
+    spot_id: Int!
     spot_name: String!
     spot_image: String
     spot_description: String
@@ -54,7 +57,7 @@ type SpotInstance {
 }
 
 type SpotKeyword {
-    keyword_id: ID!
+    keyword_id: Int!
     keyword_name: String!
     description: String
 }

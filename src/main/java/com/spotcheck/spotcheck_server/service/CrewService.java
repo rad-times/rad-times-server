@@ -26,5 +26,4 @@ public class CrewService {
             throw new RuntimeException("Failed to fetch crew by person ID: " + e.getMessage());
         }
     }
-
 }
