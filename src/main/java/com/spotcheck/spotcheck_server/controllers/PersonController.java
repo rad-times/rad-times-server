@@ -2,7 +2,6 @@ package com.spotcheck.spotcheck_server.controllers;
 
 import com.spotcheck.spotcheck_server.model.PersonModel;
 
-import com.spotcheck.spotcheck_server.service.GeolocationService;
 import com.spotcheck.spotcheck_server.service.PersonService;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -34,6 +33,7 @@ public class PersonController {
     public Optional<List<PersonModel>> searchPersonsByName(@Argument String nameToMatch) {
         return personService.searchPersonsByName(nameToMatch);
     }
+
 
     @MutationMapping
     public Optional<PersonModel> togglePersonFavorite(@Argument Integer personId, @Argument Integer activeUserId, @Argument Boolean isFavorite) {

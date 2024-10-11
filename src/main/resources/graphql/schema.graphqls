@@ -3,7 +3,7 @@ type Query {
     activePersonById(id: Int): Person
     searchPersonsByName(nameToMatch: String): [Person]
     spotById(id: Int): SpotInstance
-    spotByName(nameToMatch: String): [SpotInstance]
+    spotByName(nameToMatch: String, personId: Int): [SpotInstance]
     spotByFavoriteOnly: [SpotInstance]
     spotByPrivateOnly: [SpotInstance]
     crewByPersonId(id: Int): [Person]
@@ -27,6 +27,7 @@ type Person {
     bio: String
     profile_image: String
     is_favorite: Boolean
+    language_code: String
     socials: [SocialMedia]
     location: Geolocation
     crew: [Person]

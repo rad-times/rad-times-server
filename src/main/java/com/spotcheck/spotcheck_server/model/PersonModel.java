@@ -9,6 +9,10 @@ import java.util.Set;
 @Entity
 @Table(name="person")
 public class PersonModel {
+    private enum LanguageLocale {
+        EN, ES, FR
+    }
+
     @Id
     @GeneratedValue
     private Integer id;
@@ -19,7 +23,7 @@ public class PersonModel {
     private String bio;
     private Integer status;
     private String profile_image;
-
+    private LanguageLocale language_code;
     private Boolean is_favorite;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval=true)

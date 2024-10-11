@@ -29,9 +29,9 @@ public class SpotService {
         }
     }
 
-    public Optional<List<Spot>> getSpotsByName(String nameToMatch) {
+    public Optional<List<Spot>> getSpotsByName(String nameToMatch, Integer personId) {
         try {
-            Optional<List<Spot>> spotFavorites = spotRepository.getFavoriteSpots(1);
+            Optional<List<Spot>> spotFavorites = spotRepository.getFavoriteSpots(personId);
             spotFavorites.ifPresent(spots -> spots.forEach(spot -> {
                 spot.setIs_favorite(true);
             }));
@@ -41,7 +41,7 @@ public class SpotService {
             }
 
             // If I make this request, the favorites are still shown with is_favorite: true. Why?
-            return spotRepository.getSpotsByNameLike(nameToMatch, 1);
+            return spotRepository.getSpotsByNameLike(nameToMatch, personId);
         } catch (Exception e) {
             // Handle exception or log the error
             throw new RuntimeException("Failed to fetch spot by ID: " + e.getMessage());

@@ -1,0 +1,10 @@
+{
+  "tabs": {
+    "home": "CASA",
+    "spots": "UBICACIONES",
+    "crew" : "AMIGOS",
+    "setup": "CONFIGURACIóN"
+  },
+  "index": {
+    "checkInBtn": "Check In"
+}

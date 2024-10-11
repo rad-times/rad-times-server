@@ -25,8 +25,8 @@ public class SpotController {
     }
 
     @QueryMapping
-    public Optional<List<Spot>> spotByName(@Argument String nameToMatch) {
-        return spotService.getSpotsByName(nameToMatch);
+    public Optional<List<Spot>> spotByName(@Argument String nameToMatch, @Argument Integer personId) {
+        return spotService.getSpotsByName(nameToMatch, personId);
     }
 
     @QueryMapping

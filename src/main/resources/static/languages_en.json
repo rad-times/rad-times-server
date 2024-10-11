@@ -1,0 +1,13 @@
+{
+  "tabs": {
+    "home": "HOME",
+    "spots": "SPOTS",
+    "crew" : "CREW",
+    "setup": "SETUP"
+  },
+  "index": {
+    "title": "NEW HOTNESS",
+    "checkInBtn": "Check In",
+    "friendsActive": "Friends Active"
+  }
+}
