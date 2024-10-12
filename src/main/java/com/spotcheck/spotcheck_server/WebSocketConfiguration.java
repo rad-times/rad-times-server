@@ -1,5 +1,6 @@
 package com.spotcheck.spotcheck_server;
 
+import com.spotcheck.spotcheck_server.service.UserCheckInService;
 import com.spotcheck.spotcheck_server.socket.WebSocketHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,9 +13,15 @@ import org.springframework.web.socket.server.standard.ServletServerContainerFact
 @EnableWebSocket
 public class WebSocketConfiguration implements WebSocketConfigurer {
 
+    private final UserCheckInService userCheckInService;
+
+    public WebSocketConfiguration(UserCheckInService userCheckInService) {
+        this.userCheckInService = userCheckInService;
+    }
+
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new WebSocketHandler(), "/socket").setAllowedOrigins("*");
+        registry.addHandler(new WebSocketHandler(userCheckInService), "/socket").setAllowedOrigins("*");
     }
 
     @Bean
