@@ -1,6 +1,5 @@
 package com.spotcheck.spotcheck_server.socket;
 
-import com.spotcheck.spotcheck_server.service.CrewService;
 import com.spotcheck.spotcheck_server.service.UserCheckInService;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
@@ -13,7 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class WebSocketHandler extends AbstractWebSocketHandler {
-    Set<WebSocketSession> connnections = new HashSet<WebSocketSession>();
+    Set<WebSocketSession> connections = new HashSet<WebSocketSession>();
 
     private final UserCheckInService userCheckInService;
 
@@ -25,13 +24,13 @@ public class WebSocketHandler extends AbstractWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws IOException {
         System.out.println("Session opened");
-        connnections.add(session);
+        connections.add(session);
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus){
         System.out.println("Session closed");
-        connnections.remove(session);
+        connections.remove(session);
 
     }
 
@@ -39,7 +38,7 @@ public class WebSocketHandler extends AbstractWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
         System.out.println("New Text Message Received {}," + message);
 
-        connnections.forEach(conn -> {
+        connections.forEach(conn -> {
             try {
                 if (!conn.getId().equals(session.getId())) {
                     conn.sendMessage(message);
