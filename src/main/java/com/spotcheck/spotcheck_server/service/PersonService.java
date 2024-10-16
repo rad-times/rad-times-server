@@ -4,6 +4,8 @@ import com.spotcheck.spotcheck_server.model.FavoriteCrew;
 import com.spotcheck.spotcheck_server.model.PersonModel;
 import com.spotcheck.spotcheck_server.repository.FavoriteCrewRespository;
 import com.spotcheck.spotcheck_server.repository.PersonRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class PersonService {
+    private static final Logger log = LoggerFactory.getLogger(PersonService.class);
     private final PersonRepository personRepository;
     private final CrewService crewService;
     private final FavoriteCrewRespository favoriteCrewRespository;
@@ -31,7 +34,6 @@ public class PersonService {
             if (matchingPerson.isPresent()) {
                 PersonModel person = matchingPerson.get();
                 Optional<Set<PersonModel>> crewRequest = crewService.getCrewByPersonId(id);
-
                 if (crewRequest.isPresent()) {
                     Set<PersonModel> crewList = crewRequest.get();
                     Optional<Set<FavoriteCrew>> favoritesReq = favoriteCrewRespository.getAllFavoritesByActiveUserId(person.getId());
@@ -42,7 +44,6 @@ public class PersonService {
                         });
                     }
                 }
-
                 person.setCrew(crewRequest.orElseGet(Set::of));
             }
 

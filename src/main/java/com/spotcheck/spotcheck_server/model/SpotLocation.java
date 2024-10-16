@@ -8,8 +8,8 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name="location")
-public class Geolocation {
+@Table(name="spot_location")
+public class SpotLocation {
     @Id
     @GeneratedValue
     private Integer location_id;

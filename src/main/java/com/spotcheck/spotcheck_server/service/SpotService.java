@@ -66,6 +66,14 @@ public class SpotService {
         }
     }
 
+    public Optional<List<Spot>> getSpotByLatLng() {
+        try {
+            return spotRepository.getPrivateSpots(1);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to fetch spot by lat/lng: " + e.getMessage());
+        }
+    }
+
     public Optional<Spot> toggleSpotFavorite(Integer spotId, Integer activeUserId, Boolean isFavorite) {
         try {
             Optional<Spot> spotRequest = getSpotById(spotId);

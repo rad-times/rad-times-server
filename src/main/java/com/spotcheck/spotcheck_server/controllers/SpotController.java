@@ -39,6 +39,11 @@ public class SpotController {
         return spotService.getPrivateSpotsOnly();
     }
 
+    @QueryMapping
+    public Optional<List<Spot>> spotByLatLng() {
+        return spotService.getSpotByLatLng();
+    }
+
     @MutationMapping
     public Optional<Spot> toggleSpotFavorite(@Argument Integer spotId, @Argument Integer activeUserId, @Argument Boolean isFavorite) {
         return spotService.toggleSpotFavorite(spotId, activeUserId, isFavorite);

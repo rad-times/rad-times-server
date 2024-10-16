@@ -6,34 +6,40 @@ type Query {
     spotByName(nameToMatch: String, personId: Int): [SpotInstance]
     spotByFavoriteOnly: [SpotInstance]
     spotByPrivateOnly: [SpotInstance]
+    spotByLatLng(lat: Float, lng: Float): [SpotInstance]
     crewByPersonId(id: Int): [Person]
 }
 
 type Mutation {
     toggleSpotFavorite(spotId: Int, activeUserId:ID, isFavorite: Boolean): SpotInstance
+    createSpot: SpotInstance
     togglePersonFavorite(personId: Int, activeUserId: ID, isFavorite: Boolean): Person
-}
-
-type Void {
-    status: Int
-    message: String
 }
 
 type Person {
     id: Int!
     first_name: String
     last_name: String
-    email_address: String
     bio: String
     profile_image: String
     is_favorite: Boolean
     language_code: String
     socials: [SocialMedia]
-    location: Geolocation
+    location: PersonLocation
     crew: [Person]
 }
 
-type Geolocation {
+type PersonLocation {
+    id: Int!
+    lat: Float
+    lng: Float
+    city_id: String
+    city_name: String
+    state_name: String
+    country_name: String
+}
+
+type SpotLocation {
     location_id: Int!
     lat: Float
     lng: Float
@@ -54,7 +60,7 @@ type SpotInstance {
     is_public: Boolean
     is_private: Boolean
     is_favorite: Boolean
-    location: Geolocation
+    location: SpotLocation
     keywords: [SpotKeyword]!
 }
 

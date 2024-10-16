@@ -30,7 +30,7 @@ public class Spot {
 
     @OneToOne
     @JoinColumn(name="location_id", referencedColumnName="location_id")
-    private Geolocation location;
+    private SpotLocation location;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

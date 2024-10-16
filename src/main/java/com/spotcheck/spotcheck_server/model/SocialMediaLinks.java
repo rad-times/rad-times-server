@@ -7,7 +7,6 @@ import lombok.Data;
 @Entity
 @Table(name="social_media")
 public class SocialMediaLinks {
-    // NONE exists to eat index 0. MySQL starts from index 1
     private enum SocialType {
         FACEBOOK, INSTAGRAM, YOUTUBE
     }

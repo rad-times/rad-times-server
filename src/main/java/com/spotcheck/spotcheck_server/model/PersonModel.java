@@ -19,7 +19,6 @@ public class PersonModel {
 
     private String first_name;
     private String last_name;
-    private String email_address;
     private String bio;
     private Integer status;
     private String profile_image;
@@ -31,8 +30,8 @@ public class PersonModel {
     private Set<SocialMediaLinks> socials;
 
     @OneToOne
-    @JoinColumn(name="location_id", referencedColumnName="location_id")
-    private Geolocation location;
+    @JoinColumn(name="location_id", referencedColumnName="id")
+    private PersonLocation location;
 
     @ManyToMany
     private Set<PersonModel> crew;
