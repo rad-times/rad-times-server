@@ -2,21 +2,28 @@ package com.spotcheck.spotcheck_server.service;
 
 import com.spotcheck.spotcheck_server.model.FavoriteSpot;
 import com.spotcheck.spotcheck_server.model.Spot;
+import com.spotcheck.spotcheck_server.model.SpotLocation;
 import com.spotcheck.spotcheck_server.repository.FavoriteSpotRepository;
+import com.spotcheck.spotcheck_server.repository.SpotLocationRepository;
 import com.spotcheck.spotcheck_server.repository.SpotRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class SpotService {
     private final SpotRepository spotRepository;
     private final FavoriteSpotRepository favoriteSpotRepository;
+    private final SpotLocationRepository spotLocationRepository;
 
-    public SpotService(SpotRepository spotRepository, FavoriteSpotRepository favoriteSpotRepository) {
+    public SpotService(SpotRepository spotRepository, FavoriteSpotRepository favoriteSpotRepository, SpotLocationRepository spotLocationRepository) {
         this.spotRepository = spotRepository;
         this.favoriteSpotRepository = favoriteSpotRepository;
+        this.spotLocationRepository = spotLocationRepository;
     }
 
     // Get a spot by ID
@@ -57,18 +64,30 @@ public class SpotService {
         }
     }
 
-    public Optional<List<Spot>> getPrivateSpotsOnly() {
+    public Optional<List<Spot>> getPrivateSpotsOnly(Integer personId) {
         try {
-            return spotRepository.getPrivateSpots(1);
+            return spotRepository.getPrivateSpots(personId);
         } catch (Exception e) {
             // Handle exception or log the error
             throw new RuntimeException("Failed to fetch spot by ID: " + e.getMessage());
         }
     }
 
-    public Optional<List<Spot>> getSpotByLatLng() {
+    public List<Spot> getSpotByLatLng(Float lat, Float lng, Integer activeUserId) {
         try {
-            return spotRepository.getPrivateSpots(1);
+
+            List<SpotLocation> matchingLocations =  spotLocationRepository.getSpotsByLatLng(lat, lng);
+            if (matchingLocations.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            List<Spot> spots = new ArrayList<>();
+            matchingLocations.forEach(loc -> {
+                Optional<List<Spot>> matchingSpots = spotRepository.getSpotsByLocationId(loc.getLocation_id());
+                matchingSpots.ifPresent(spots::addAll);
+            });
+
+            return spots;
         } catch (Exception e) {
             throw new RuntimeException("Failed to fetch spot by lat/lng: " + e.getMessage());
         }

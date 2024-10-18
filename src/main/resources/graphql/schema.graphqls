@@ -3,10 +3,10 @@ type Query {
     activePersonById(id: Int): Person
     searchPersonsByName(nameToMatch: String): [Person]
     spotById(id: Int): SpotInstance
-    spotByName(nameToMatch: String, personId: Int): [SpotInstance]
+    spotByName(nameToMatch: String, activeUserId: Int): [SpotInstance]
     spotByFavoriteOnly: [SpotInstance]
-    spotByPrivateOnly: [SpotInstance]
-    spotByLatLng(lat: Float, lng: Float): [SpotInstance]
+    spotByPrivateOnly(activeUserId: Int): [SpotInstance]
+    spotByLatLng(lat: Float, lng: Float, activeUserId: Int): [SpotInstance]
     crewByPersonId(id: Int): [Person]
 }
 

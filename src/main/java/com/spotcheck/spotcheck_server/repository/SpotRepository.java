@@ -20,4 +20,7 @@ public interface SpotRepository extends JpaRepository<Spot, Integer> {
 
     @Query("SELECT sp FROM Spot sp JOIN PrivateSpot pvt ON pvt.spot_id = sp.spot_id WHERE pvt.person_id = :personId")
     Optional<List<Spot>> getPrivateSpots(@Param("personId") Integer personId);
+
+    @Query("SELECT sp from Spot sp WHERE sp.location_id = :locationId")
+    Optional<List<Spot>> getSpotsByLocationId(@Param("locationId") Integer locationId);
 }

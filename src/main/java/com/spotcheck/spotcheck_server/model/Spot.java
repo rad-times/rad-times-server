@@ -28,6 +28,9 @@ public class Spot {
     private Boolean is_private;
     private Boolean is_favorite;
 
+    @Column(insertable = false, updatable = false)
+    private Integer location_id;
+
     @OneToOne
     @JoinColumn(name="location_id", referencedColumnName="location_id")
     private SpotLocation location;

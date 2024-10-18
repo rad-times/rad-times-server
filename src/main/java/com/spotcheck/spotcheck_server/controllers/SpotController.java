@@ -25,8 +25,8 @@ public class SpotController {
     }
 
     @QueryMapping
-    public Optional<List<Spot>> spotByName(@Argument String nameToMatch, @Argument Integer personId) {
-        return spotService.getSpotsByName(nameToMatch, personId);
+    public Optional<List<Spot>> spotByName(@Argument String nameToMatch, @Argument Integer activeUserId) {
+        return spotService.getSpotsByName(nameToMatch, activeUserId);
     }
 
     @QueryMapping
@@ -35,13 +35,13 @@ public class SpotController {
     }
 
     @QueryMapping
-    public Optional<List<Spot>> spotByPrivateOnly() {
-        return spotService.getPrivateSpotsOnly();
+    public Optional<List<Spot>> spotByPrivateOnly(@Argument Integer activeUserId) {
+        return spotService.getPrivateSpotsOnly(activeUserId);
     }
 
     @QueryMapping
-    public Optional<List<Spot>> spotByLatLng() {
-        return spotService.getSpotByLatLng();
+    public List<Spot> spotByLatLng(@Argument Float lat, @Argument Float lng, @Argument Integer activeUserId) {
+        return spotService.getSpotByLatLng(lat, lng, activeUserId);
     }
 
     @MutationMapping
