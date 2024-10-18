@@ -6,7 +6,7 @@ type Query {
     spotByName(nameToMatch: String, activeUserId: Int): [SpotInstance]
     spotByFavoriteOnly: [SpotInstance]
     spotByPrivateOnly(activeUserId: Int): [SpotInstance]
-    spotByLatLng(lat: Float, lng: Float, activeUserId: Int): [SpotInstance]
+    spotByLatLng(lat: Float, lng: Float, distance: Int, activeUserId: Int): [SpotInstance]
     crewByPersonId(id: Int): [Person]
 }
 

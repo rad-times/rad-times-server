@@ -9,10 +9,8 @@ import com.spotcheck.spotcheck_server.repository.SpotRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class SpotService {
@@ -73,17 +71,17 @@ public class SpotService {
         }
     }
 
-    public List<Spot> getSpotByLatLng(Float lat, Float lng, Integer activeUserId) {
+    public List<Spot> getSpotByLatLng(Float lat, Float lng, Integer distance, Integer activeUserId) {
         try {
 
-            List<SpotLocation> matchingLocations =  spotLocationRepository.getSpotsByLatLng(lat, lng);
+            List<SpotLocation> matchingLocations =  spotLocationRepository.getSpotsByLatLng(lat, lng, distance);
             if (matchingLocations.isEmpty()) {
                 return new ArrayList<>();
             }
 
             List<Spot> spots = new ArrayList<>();
             matchingLocations.forEach(loc -> {
-                Optional<List<Spot>> matchingSpots = spotRepository.getSpotsByLocationId(loc.getLocation_id());
+                Optional<List<Spot>> matchingSpots = spotRepository.getUserSpotsByLocationId(loc.getLocation_id(), activeUserId);
                 matchingSpots.ifPresent(spots::addAll);
             });
 

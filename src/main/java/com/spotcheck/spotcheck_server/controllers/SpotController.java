@@ -40,8 +40,8 @@ public class SpotController {
     }
 
     @QueryMapping
-    public List<Spot> spotByLatLng(@Argument Float lat, @Argument Float lng, @Argument Integer activeUserId) {
-        return spotService.getSpotByLatLng(lat, lng, activeUserId);
+    public List<Spot> spotByLatLng(@Argument Float lat, @Argument Float lng, @Argument Integer distance, @Argument Integer activeUserId) {
+        return spotService.getSpotByLatLng(lat, lng, distance, activeUserId);
     }
 
     @MutationMapping

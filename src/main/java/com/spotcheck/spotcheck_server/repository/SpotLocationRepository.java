@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface SpotLocationRepository extends JpaRepository<SpotLocation, Integer> {
@@ -22,8 +21,8 @@ public interface SpotLocationRepository extends JpaRepository<SpotLocation, Inte
             "    )\n" +
             "  ) AS distance\n" +
             "FROM spot_location sploc \n" +
-            "HAVING distance < 30\n" +
+            "HAVING distance < :distance \n" +
             "ORDER BY distance asc",
           nativeQuery = true)
-    List<SpotLocation> getSpotsByLatLng(@Param("lat") Float lat, @Param("lng") Float lng);
+    List<SpotLocation> getSpotsByLatLng(@Param("lat") Float lat, @Param("lng") Float lng, @Param("distance") Integer distance);
 }
