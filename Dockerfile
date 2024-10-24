@@ -4,5 +4,5 @@ COPY . .
 
 COPY build/libs/rad-times-server-0.0.1.jar rad-times-server.jar
 
-EXPOSE 3030
+EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "rad-times-server.jar"]
