@@ -18,10 +18,14 @@ public class HealthAndLiveness {
 
         class ServerStateInfo {
             private final String version = buildProperties.getVersion();
+            private final String name = "Rad Times server";
             ServerStateInfo() {}
         }
 
         ServerStateInfo serverStateInfo = new ServerStateInfo();
-        return "{version: " + serverStateInfo.version + "}";
+        return "{ " +
+                "name: " + serverStateInfo.name + " " +
+                "version: " + serverStateInfo.version +
+                " }";
     }
 }
