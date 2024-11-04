@@ -17,9 +17,4 @@ public class IndexController implements ErrorController{
     public String getErrorPath() {
         return "Error for this route";
     }
-
-    @GetMapping("/api/secured")
-    public String secured(OAuth2AuthenticationToken token) {
-        return token.getPrincipal().toString();
-    }
 }
