@@ -88,21 +88,12 @@ public class PersonService {
         newPerson.setFirst_name((String) personData.get("given_name"));
         newPerson.setLast_name((String) personData.get("family_name"));
         newPerson.setProfile_image((String) personData.get("picture"));
-        String locale = (String) personData.get("locale");
-        switch(locale) {
-            case "en":
-                newPerson.setLanguage_code(PersonModel.LanguageLocale.EN);
-                break;
-            case "es":
-                newPerson.setLanguage_code(PersonModel.LanguageLocale.ES);
-                break;
-            case "fr":
-                newPerson.setLanguage_code(PersonModel.LanguageLocale.FR);
-                break;
-            default:
-                newPerson.setLanguage_code(PersonModel.LanguageLocale.EN);
-        }
+
+        // Locale appears to not be sent any longer. Start the user on EN
+        newPerson.setLanguage_code(PersonModel.LanguageLocale.EN);
         newPerson.setStatus(PersonModel.UserStatus.PENDING);
+
+        personRepository.save(newPerson);
         return newPerson;
     }
     /**

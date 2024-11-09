@@ -8,7 +8,7 @@ import lombok.Data;
 @Table(name="keyword")
 public class Keyword {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer keyword_id;
 
     private String keyword_name;
