@@ -1,6 +1,5 @@
 package com.radtimes.rad_times_server.service;
 
-import com.radtimes.rad_times_server.model.PersonModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,9 +13,6 @@ import com.google.api.client.json.gson.GsonFactory;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -34,7 +30,7 @@ public class GoogleAuthenticationService {
     @Value("${oauth2.google.client-id-ios}")
     private String CLIENT_ID_IOS;
 
-    public PersonModel validateGoogleAuthToken(String token) {
+    public Payload validateGoogleAuthToken(String token) {
 
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
                 .setAudience(Arrays.asList(CLIENT_ID_WEB, CLIENT_ID_IOS))
@@ -46,16 +42,12 @@ public class GoogleAuthenticationService {
                 Payload payload = idToken.getPayload();
                 String aud = (String) payload.getAudience();
 
-
                 if (!aud.equals(CLIENT_ID_WEB) && !aud.equals(CLIENT_ID_IOS)) {
                     log.error("------------- Client ID mismatch in returned token");
                     throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
                 }
 
-                Optional<PersonModel> matchingPerson = personService.getActivePersonByAuthId(payload.getSubject());
-
-                return matchingPerson.orElseGet(() -> personService.createPersonFromAuthData(payload));
-
+                return payload;
             } else {
                 log.error("------------- Provided token returned NULL on validation check");
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");

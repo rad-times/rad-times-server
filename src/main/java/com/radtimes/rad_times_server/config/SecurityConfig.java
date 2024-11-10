@@ -13,7 +13,6 @@ public class SecurityConfig {
     private static final String[] WHITELIST_URLS = {
             "/",
             "/index.html",
-            "/authenticate",
             "/static/**",
             "/actuator/**"
     };
