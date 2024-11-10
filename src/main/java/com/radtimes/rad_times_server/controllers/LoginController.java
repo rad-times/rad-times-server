@@ -4,6 +4,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.radtimes.rad_times_server.model.PersonModel;
 import com.radtimes.rad_times_server.service.GoogleAuthenticationService;
 import com.radtimes.rad_times_server.service.PersonService;
+import com.radtimes.rad_times_server.util.JWTUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -19,13 +20,13 @@ public class LoginController {
     private final GoogleAuthenticationService googleAuthenticationService;
     private final PersonService personService;
 
-    public LoginController(GoogleAuthenticationService googleAuthenticationService, PersonService personService) {
+    public LoginController(GoogleAuthenticationService googleAuthenticationService, PersonService personService, JWTUtil jwtUtil) {
         this.googleAuthenticationService = googleAuthenticationService;
         this.personService = personService;
     }
 
     @GetMapping("/login")
-    public ResponseEntity<PersonModel> authenticate(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<String> authenticate(HttpServletRequest request, HttpServletResponse response) {
         String authorizationHeader = request.getHeader("Authorization");
 
         if (authorizationHeader != null) {
@@ -35,7 +36,9 @@ public class LoginController {
 
                 Optional<PersonModel> matchingPerson = personService.getActivePersonByAuthId(idTokenPayload.getSubject());
                 PersonModel person =  matchingPerson.orElseGet(() -> personService.createPersonFromAuthData(idTokenPayload));
-                return new ResponseEntity<>(person, HttpStatus.OK);
+
+                String userToken = JWTUtil.createJWT(person.getUser_id(), idTokenPayload.getIssuer(), idTokenPayload.getSubject());
+                return new ResponseEntity<>(userToken, HttpStatus.OK);
 
             } else {
                 return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
