@@ -6,6 +6,8 @@ import java.security.Key;
 
 import io.jsonwebtoken.*;
 import java.util.Date;
+import java.util.UUID;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -22,7 +24,7 @@ public class JWTUtil {
         EXPIRATION_TIME = time;
     }
 
-    public static String createJWT(String id, String issuer, String subject) {
+    public static String createJWT(String issuer, String subject, Integer userId) {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
         long nowMillis = System.currentTimeMillis();
@@ -33,11 +35,13 @@ public class JWTUtil {
         byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary(SECRET_KEY);
         Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
 
-        JwtBuilder builder = Jwts.builder().setId(id)
+        JwtBuilder builder = Jwts.builder()
+                .setId(UUID.randomUUID().toString())
                 .setIssuedAt(now)
                 .setSubject(subject)
                 .setIssuer(issuer)
                 .setExpiration(exp)
+                .claim("userId", userId)
                 .signWith(signatureAlgorithm, signingKey);
 
         return builder.compact();

@@ -23,19 +23,19 @@ public class JWTUtilTest {
     @Test
     public void createAndDecodeJWT() {
 
-        String jwtId = "SOMEID1234";
+        Integer userId = 12;
         String jwtIssuer = "JWT Demo";
         String jwtSubject = "Andrew";
 
         String jwt = JWTUtil.createJWT(
-                jwtId, // claim = jti
-                jwtIssuer, // claim = iss
-                jwtSubject // claim = sub
+                jwtIssuer,
+                jwtSubject,
+                userId
         );
 
         Claims claims = JWTUtil.decodeJWT(jwt);
 
-        assertEquals(jwtId, claims.getId());
+        assertEquals(userId, claims.get("userId"));
         assertEquals(jwtIssuer, claims.getIssuer());
         assertEquals(jwtSubject, claims.getSubject());
     }
@@ -55,14 +55,14 @@ public class JWTUtilTest {
     @Test
     public void createAndDecodeTamperedJWT() {
 
-        String jwtId = "SOMEID1234";
+        Integer userId = 12;
         String jwtIssuer = "JWT Demo";
         String jwtSubject = "Andrew";
 
         String jwt = JWTUtil.createJWT(
-                jwtId, // claim = jti
-                jwtIssuer, // claim = iss
-                jwtSubject // claim = sub
+                jwtIssuer,
+                jwtSubject,
+                userId
         );
 
         // tamper with the JWT

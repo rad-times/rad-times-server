@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -26,7 +28,7 @@ public class LoginController {
     }
 
     @GetMapping("/login")
-    public ResponseEntity<String> authenticate(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<Object> authenticate(HttpServletRequest request, HttpServletResponse response) {
         String authorizationHeader = request.getHeader("Authorization");
 
         if (authorizationHeader != null) {
@@ -37,8 +39,12 @@ public class LoginController {
                 Optional<PersonModel> matchingPerson = personService.getActivePersonByAuthId(idTokenPayload.getSubject());
                 PersonModel person =  matchingPerson.orElseGet(() -> personService.createPersonFromAuthData(idTokenPayload));
 
-                String userToken = JWTUtil.createJWT(person.getUser_id(), idTokenPayload.getIssuer(), idTokenPayload.getSubject());
-                return new ResponseEntity<>(userToken, HttpStatus.OK);
+                String userToken = JWTUtil.createJWT(idTokenPayload.getIssuer(), idTokenPayload.getSubject(), person.getId());
+
+                Map<String, Object> resp = new HashMap<String, Object>();
+                resp.put("token", userToken);
+                resp.put("activeUser", person);
+                return new ResponseEntity<Object>(resp, HttpStatus.OK);
 
             } else {
                 return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
