@@ -1,5 +1,6 @@
 package com.radtimes.rad_times_server.service;
 
+import com.google.api.client.auth.openidconnect.IdToken;
 import com.radtimes.rad_times_server.model.FavoriteCrew;
 import com.radtimes.rad_times_server.model.PersonModel;
 import com.radtimes.rad_times_server.repository.FavoriteCrewRespository;
@@ -25,15 +26,27 @@ public class PersonService {
         this.crewService = crewService;
         this.favoriteCrewRespository = favoriteCrewRespository;
     }
+
+    /**
+     * Use the user ID returned from oAuth to find a person record
+     */
+    public Optional<PersonModel> getActivePersonByAuthId(String userId) {
+        try {
+            return personRepository.findByUserId(userId);
+        } catch (Exception e) {
+            // Handle exception or log the error
+            throw new RuntimeException("Failed to fetch player by User ID: " + e.getMessage());
+        }
+    }
     /**
      * Gets the user data for the person using the application
      */
-    public Optional<PersonModel> getActivePersonById(Integer id) {
+    public Optional<PersonModel> getActivePersonById(String id) {
         try {
-            Optional<PersonModel> matchingPerson = personRepository.findById(id);
+            Optional<PersonModel> matchingPerson = personRepository.findByUserId(id);
             if (matchingPerson.isPresent()) {
                 PersonModel person = matchingPerson.get();
-                Optional<Set<PersonModel>> crewRequest = crewService.getCrewByPersonId(id);
+                Optional<Set<PersonModel>> crewRequest = crewService.getCrewByPersonId(person.getId());
                 if (crewRequest.isPresent()) {
                     Set<PersonModel> crewList = crewRequest.get();
                     Optional<Set<FavoriteCrew>> favoritesReq = favoriteCrewRespository.getAllFavoritesByActiveUserId(person.getId());
@@ -64,6 +77,24 @@ public class PersonService {
             // Handle exception or log the error
             throw new RuntimeException("Failed to fetch player by ID: " + e.getMessage());
         }
+    }
+    /**
+     * Create a new person record from oAuth sign in request
+     */
+    public PersonModel createPersonFromAuthData(IdToken.Payload personData) {
+        PersonModel newPerson = new PersonModel();
+
+        newPerson.setUser_id(personData.getSubject());
+        newPerson.setFirst_name((String) personData.get("given_name"));
+        newPerson.setLast_name((String) personData.get("family_name"));
+        newPerson.setProfile_image((String) personData.get("picture"));
+
+        // Locale appears to not be sent any longer. Start the user on EN
+        newPerson.setLanguage_code(PersonModel.LanguageLocale.EN);
+        newPerson.setStatus(PersonModel.UserStatus.PENDING);
+
+        personRepository.save(newPerson);
+        return newPerson;
     }
     /**
      * Returns all persons matching the name param

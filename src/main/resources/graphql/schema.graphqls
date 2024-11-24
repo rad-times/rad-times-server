@@ -1,6 +1,6 @@
 type Query {
     personById(id: Int): Person
-    activePersonById(id: Int): Person
+    activePersonBySubject(id: String): Person
     searchPersonsByName(nameToMatch: String): [Person]
     spotById(id: Int): SpotInstance
     spotByName(nameToMatch: String, activeUserId: Int): [SpotInstance]

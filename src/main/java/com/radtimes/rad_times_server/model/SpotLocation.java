@@ -1,9 +1,6 @@
 package com.radtimes.rad_times_server.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
@@ -11,7 +8,7 @@ import lombok.Data;
 @Table(name="spot_location")
 public class SpotLocation {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer location_id;
 
     private Double lat;

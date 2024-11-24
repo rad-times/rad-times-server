@@ -9,20 +9,28 @@ import java.util.Set;
 @Entity
 @Table(name="person")
 public class PersonModel {
-    private enum LanguageLocale {
+    public enum LanguageLocale {
         EN, ES, FR
+    }
+    public enum UserStatus {
+        PENDING, ACTIVE, DELETED
     }
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    // From oAuth token
+    private String user_id;
 
     private String first_name;
     private String last_name;
     private String bio;
-    private Integer status;
     private String profile_image;
     private LanguageLocale language_code;
+
+    private UserStatus status;
+
+    @Transient
     private Boolean is_favorite;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval=true)

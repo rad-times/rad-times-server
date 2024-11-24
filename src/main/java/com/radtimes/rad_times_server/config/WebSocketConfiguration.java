@@ -1,4 +1,4 @@
-package com.radtimes.rad_times_server;
+package com.radtimes.rad_times_server.config;
 
 import com.radtimes.rad_times_server.service.UserCheckInService;
 import com.radtimes.rad_times_server.socket.WebSocketHandler;

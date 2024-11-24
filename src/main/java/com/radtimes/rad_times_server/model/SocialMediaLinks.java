@@ -12,7 +12,7 @@ public class SocialMediaLinks {
     }
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private Integer person_id;
