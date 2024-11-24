@@ -4,7 +4,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.radtimes.rad_times_server.model.PersonModel;
 import com.radtimes.rad_times_server.service.GoogleAuthenticationService;
 import com.radtimes.rad_times_server.service.PersonService;
-import com.radtimes.rad_times_server.util.JWTUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +19,7 @@ public class LoginController {
     private final GoogleAuthenticationService googleAuthenticationService;
     private final PersonService personService;
 
-    public LoginController(GoogleAuthenticationService googleAuthenticationService, PersonService personService, JWTUtil jwtUtil) {
+    public LoginController(GoogleAuthenticationService googleAuthenticationService, PersonService personService) {
         this.googleAuthenticationService = googleAuthenticationService;
         this.personService = personService;
     }
