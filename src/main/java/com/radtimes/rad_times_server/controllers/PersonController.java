@@ -25,8 +25,7 @@ public class PersonController {
     }
 
     @QueryMapping
-
-    public Optional<PersonModel> activePersonById(@Argument Integer id) {
+    public Optional<PersonModel> activePersonBySubject(@Argument String id) {
         return personService.getActivePersonById(id);
     }
 

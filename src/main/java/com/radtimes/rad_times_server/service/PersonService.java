@@ -41,12 +41,12 @@ public class PersonService {
     /**
      * Gets the user data for the person using the application
      */
-    public Optional<PersonModel> getActivePersonById(Integer id) {
+    public Optional<PersonModel> getActivePersonById(String id) {
         try {
-            Optional<PersonModel> matchingPerson = personRepository.findById(id);
+            Optional<PersonModel> matchingPerson = personRepository.findByUserId(id);
             if (matchingPerson.isPresent()) {
                 PersonModel person = matchingPerson.get();
-                Optional<Set<PersonModel>> crewRequest = crewService.getCrewByPersonId(id);
+                Optional<Set<PersonModel>> crewRequest = crewService.getCrewByPersonId(person.getId());
                 if (crewRequest.isPresent()) {
                     Set<PersonModel> crewList = crewRequest.get();
                     Optional<Set<FavoriteCrew>> favoritesReq = favoriteCrewRespository.getAllFavoritesByActiveUserId(person.getId());
