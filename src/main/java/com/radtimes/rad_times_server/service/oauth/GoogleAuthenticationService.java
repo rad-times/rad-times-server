@@ -1,4 +1,4 @@
-package com.radtimes.rad_times_server.service;
+package com.radtimes.rad_times_server.service.oauth;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -18,11 +18,7 @@ import java.util.Arrays;
 @Service
 public class GoogleAuthenticationService {
 
-    private final PersonService personService;
-
-    public GoogleAuthenticationService(PersonService personService) {
-        this.personService = personService;
-    }
+    public GoogleAuthenticationService() {}
 
     @Value("${oauth2.google.client-id-web}")
     private String CLIENT_ID_WEB;

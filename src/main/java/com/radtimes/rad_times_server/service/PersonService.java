@@ -3,6 +3,7 @@ package com.radtimes.rad_times_server.service;
 import com.google.api.client.auth.openidconnect.IdToken;
 import com.radtimes.rad_times_server.model.FavoriteCrew;
 import com.radtimes.rad_times_server.model.PersonModel;
+import com.radtimes.rad_times_server.model.oauth.FacebookTokenPayload;
 import com.radtimes.rad_times_server.repository.FavoriteCrewRespository;
 import com.radtimes.rad_times_server.repository.PersonRepository;
 import org.slf4j.Logger;
@@ -81,13 +82,29 @@ public class PersonService {
     /**
      * Create a new person record from oAuth sign in request
      */
-    public PersonModel createPersonFromAuthData(IdToken.Payload personData) {
+    public PersonModel createPersonFromGoogleData(IdToken.Payload personData) {
         PersonModel newPerson = new PersonModel();
 
         newPerson.setUser_id(personData.getSubject());
         newPerson.setFirst_name((String) personData.get("given_name"));
         newPerson.setLast_name((String) personData.get("family_name"));
         newPerson.setProfile_image((String) personData.get("picture"));
+
+        // Locale appears to not be sent any longer. Start the user on EN
+        newPerson.setLanguage_code(PersonModel.LanguageLocale.EN);
+        newPerson.setStatus(PersonModel.UserStatus.PENDING);
+
+        personRepository.save(newPerson);
+        return newPerson;
+    }
+
+    public PersonModel createPersonFromFacebookData(FacebookTokenPayload personData) {
+        PersonModel newPerson = new PersonModel();
+
+        newPerson.setUser_id(personData.getSub());
+        newPerson.setFirst_name((String) personData.getGiven_name());
+        newPerson.setLast_name((String) personData.getFamily_name());
+        newPerson.setProfile_image((String) personData.getPicture());
 
         // Locale appears to not be sent any longer. Start the user on EN
         newPerson.setLanguage_code(PersonModel.LanguageLocale.EN);
