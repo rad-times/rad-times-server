@@ -10,7 +10,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import org.apache.commons.codec.binary.Base64;
 
-import java.time.Instant;
 import java.util.Date;
 
 @Slf4j
@@ -37,9 +36,11 @@ public class FacebookAuthenticationService {
             FacebookTokenPayload payload = g.fromJson(body, FacebookTokenPayload.class);
             String aud = payload.getAud();
             String iss = payload.getIss();
+            String secret = payload.getNonce();
             Long exp = payload.getExp();
             Date expDate = new Date(exp * 1000);
 
+             // Full validation https://developers.facebook.com/docs/facebook-login/limited-login/token/validating
              if (!aud.equals(CLIENT_ID)) {
                  log.error("------------- Client ID mismatch in returned token");
                  throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
@@ -48,6 +49,11 @@ public class FacebookAuthenticationService {
              if (!iss.equals("https://www.facebook.com")) {
                 log.error("------------- Issuer mismatch in returned token");
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
+             }
+
+             if (!secret.equals(SECRET_KEY)) {
+                 log.error("------------- Secret key mismatch in returned token");
+                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
              }
 
             if (expDate.before(new Date())) {

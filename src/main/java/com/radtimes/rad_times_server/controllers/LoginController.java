@@ -52,7 +52,7 @@ public class LoginController {
                 if (authType.equals(AUTH_TYPES.GOOGLE.key)) {
                     GoogleIdToken.Payload idTokenPayload =  googleAuthenticationService.validateGoogleAuthToken(token);
 
-                    Optional<PersonModel> matchingPerson = personService.getActivePersonByAuthId(idTokenPayload.getSubject());
+                    Optional<PersonModel> matchingPerson = personService.findPersonByEmail(idTokenPayload.getEmail());
                     PersonModel person =  matchingPerson.orElseGet(() -> personService.createPersonFromGoogleData(idTokenPayload));
 
                     if (person != null) {
@@ -65,7 +65,7 @@ public class LoginController {
                 if (authType.equals(AUTH_TYPES.FACEBOOK.key)) {
                     FacebookTokenPayload idTokenPayload =  facebookAuthenticationService.validateFacebookAuthToken(token);
 
-                    Optional<PersonModel> matchingPerson = personService.getActivePersonByAuthId(idTokenPayload.getSub());
+                    Optional<PersonModel> matchingPerson = personService.findPersonByEmail(idTokenPayload.getEmail());
                     PersonModel person =  matchingPerson.orElseGet(() -> personService.createPersonFromFacebookData(idTokenPayload));
 
                     if (person != null) {

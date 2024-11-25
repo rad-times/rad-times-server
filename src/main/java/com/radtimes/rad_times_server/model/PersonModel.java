@@ -24,6 +24,7 @@ public class PersonModel {
 
     private String first_name;
     private String last_name;
+    private String email;
     private String bio;
     private String profile_image;
     private LanguageLocale language_code;

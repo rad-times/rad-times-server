@@ -25,15 +25,14 @@ public class PersonController {
     }
 
     @QueryMapping
-    public Optional<PersonModel> activePersonBySubject(@Argument String id) {
-        return personService.getActivePersonById(id);
+    public Optional<PersonModel> activePersonByEmail(@Argument String email) {
+        return personService.getActivePersonByEmail(email);
     }
 
     @QueryMapping
     public Optional<List<PersonModel>> searchPersonsByName(@Argument String nameToMatch) {
         return personService.searchPersonsByName(nameToMatch);
     }
-
 
     @MutationMapping
     public Optional<PersonModel> togglePersonFavorite(@Argument Integer personId, @Argument Integer activeUserId, @Argument Boolean isFavorite) {
