@@ -13,8 +13,8 @@ import java.util.Set;
 @Repository
 public interface PersonRepository extends JpaRepository<PersonModel, Integer>  {
 
-    @Query("SELECT p FROM PersonModel p WHERE p.user_id = :userId")
-    Optional<PersonModel> findByUserId(@Param("userId") String userId);
+    @Query("SELECT p FROM PersonModel p WHERE p.email = :email")
+    Optional<PersonModel> findByEmail(@Param("email") String email);
 
     @Query("SELECT p FROM PersonModel p WHERE concat(p.first_name, ' ',  p.last_name) LIKE %:nameToMatch%")
     Optional<List<PersonModel>> searchByPersonNameLike(@Param("nameToMatch") String nameToMatch);

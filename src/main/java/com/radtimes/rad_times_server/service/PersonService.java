@@ -3,6 +3,7 @@ package com.radtimes.rad_times_server.service;
 import com.google.api.client.auth.openidconnect.IdToken;
 import com.radtimes.rad_times_server.model.FavoriteCrew;
 import com.radtimes.rad_times_server.model.PersonModel;
+import com.radtimes.rad_times_server.model.oauth.FacebookTokenPayload;
 import com.radtimes.rad_times_server.repository.FavoriteCrewRespository;
 import com.radtimes.rad_times_server.repository.PersonRepository;
 import org.slf4j.Logger;
@@ -30,9 +31,9 @@ public class PersonService {
     /**
      * Use the user ID returned from oAuth to find a person record
      */
-    public Optional<PersonModel> getActivePersonByAuthId(String userId) {
+    public Optional<PersonModel> findPersonByEmail(String email) {
         try {
-            return personRepository.findByUserId(userId);
+            return personRepository.findByEmail(email);
         } catch (Exception e) {
             // Handle exception or log the error
             throw new RuntimeException("Failed to fetch player by User ID: " + e.getMessage());
@@ -41,9 +42,9 @@ public class PersonService {
     /**
      * Gets the user data for the person using the application
      */
-    public Optional<PersonModel> getActivePersonById(String id) {
+    public Optional<PersonModel> getActivePersonByEmail(String email) {
         try {
-            Optional<PersonModel> matchingPerson = personRepository.findByUserId(id);
+            Optional<PersonModel> matchingPerson = personRepository.findByEmail(email);
             if (matchingPerson.isPresent()) {
                 PersonModel person = matchingPerson.get();
                 Optional<Set<PersonModel>> crewRequest = crewService.getCrewByPersonId(person.getId());
@@ -64,7 +65,7 @@ public class PersonService {
 
         } catch (Exception e) {
             // Handle exception or log the error
-            throw new RuntimeException("Failed to fetch player by ID: " + e.getMessage());
+            throw new RuntimeException("Failed to fetch player by email: " + e.getMessage());
         }
     }
     /**
@@ -81,13 +82,31 @@ public class PersonService {
     /**
      * Create a new person record from oAuth sign in request
      */
-    public PersonModel createPersonFromAuthData(IdToken.Payload personData) {
+    public PersonModel createPersonFromGoogleData(IdToken.Payload personData) {
         PersonModel newPerson = new PersonModel();
 
         newPerson.setUser_id(personData.getSubject());
+        newPerson.setEmail((String) personData.get("email"));
         newPerson.setFirst_name((String) personData.get("given_name"));
         newPerson.setLast_name((String) personData.get("family_name"));
         newPerson.setProfile_image((String) personData.get("picture"));
+
+        // Locale appears to not be sent any longer. Start the user on EN
+        newPerson.setLanguage_code(PersonModel.LanguageLocale.EN);
+        newPerson.setStatus(PersonModel.UserStatus.PENDING);
+
+        personRepository.save(newPerson);
+        return newPerson;
+    }
+
+    public PersonModel createPersonFromFacebookData(FacebookTokenPayload personData) {
+        PersonModel newPerson = new PersonModel();
+
+        newPerson.setUser_id(personData.getSub());
+        newPerson.setEmail(personData.getEmail());
+        newPerson.setFirst_name(personData.getGiven_name());
+        newPerson.setLast_name(personData.getFamily_name());
+        newPerson.setProfile_image(personData.getPicture());
 
         // Locale appears to not be sent any longer. Start the user on EN
         newPerson.setLanguage_code(PersonModel.LanguageLocale.EN);
