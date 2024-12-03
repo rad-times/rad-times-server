@@ -1,5 +1,6 @@
 package com.radtimes.rad_times_server.util;
 
+import com.radtimes.rad_times_server.model.PersonModel;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
@@ -23,21 +24,23 @@ public class JWTUtilTest {
     @Test
     public void createAndDecodeJWT() {
 
-        Integer userId = 12;
-        String jwtIssuer = "JWT Demo";
-        String jwtSubject = "Andrew";
+        String userId = "12";
+        String email = "david.ryan.hall@gmail.com";
+        String jwtIssuer = "https://radtimes.com";
+        PersonModel.LanguageLocale languageCode = PersonModel.LanguageLocale.EN;
 
         String jwt = JWTUtil.createJWT(
-                jwtIssuer,
-                jwtSubject,
-                userId
+                userId,
+                email,
+                languageCode
         );
 
         Claims claims = JWTUtil.decodeJWT(jwt);
 
-        assertEquals(userId, claims.get("userId"));
+        assertEquals(PersonModel.LanguageLocale.EN.toString(), claims.get("languageCode"));
+        assertEquals(email, claims.get("email"));
         assertEquals(jwtIssuer, claims.getIssuer());
-        assertEquals(jwtSubject, claims.getSubject());
+        assertEquals(userId, claims.getSubject());
     }
 
     /*
@@ -55,14 +58,14 @@ public class JWTUtilTest {
     @Test
     public void createAndDecodeTamperedJWT() {
 
-        Integer userId = 12;
-        String jwtIssuer = "JWT Demo";
-        String jwtSubject = "Andrew";
+        String userId = "12";
+        String email = "david.ryan.hall@gmail.com";
+        PersonModel.LanguageLocale languageCode = PersonModel.LanguageLocale.EN;
 
         String jwt = JWTUtil.createJWT(
-                jwtIssuer,
-                jwtSubject,
-                userId
+                userId,
+                email,
+                languageCode
         );
 
         // tamper with the JWT

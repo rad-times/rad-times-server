@@ -85,7 +85,6 @@ public class PersonService {
     public PersonModel createPersonFromGoogleData(IdToken.Payload personData) {
         PersonModel newPerson = new PersonModel();
 
-        newPerson.setUser_id(personData.getSubject());
         newPerson.setEmail((String) personData.get("email"));
         newPerson.setFirst_name((String) personData.get("given_name"));
         newPerson.setLast_name((String) personData.get("family_name"));
@@ -102,7 +101,6 @@ public class PersonService {
     public PersonModel createPersonFromFacebookData(FacebookTokenPayload personData) {
         PersonModel newPerson = new PersonModel();
 
-        newPerson.setUser_id(personData.getSub());
         newPerson.setEmail(personData.getEmail());
         newPerson.setFirst_name(personData.getGiven_name());
         newPerson.setLast_name(personData.getFamily_name());

@@ -4,6 +4,7 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 import java.security.Key;
 
+import com.radtimes.rad_times_server.model.PersonModel;
 import io.jsonwebtoken.*;
 import java.util.Date;
 import java.util.UUID;
@@ -24,7 +25,7 @@ public class JWTUtil {
         EXPIRATION_TIME = time;
     }
 
-    public static String createJWT(String issuer, String subject, Integer userId) {
+    public static String createJWT(String subjectId, String email, PersonModel.LanguageLocale languageCode) {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
         long nowMillis = System.currentTimeMillis();
@@ -38,10 +39,11 @@ public class JWTUtil {
         JwtBuilder builder = Jwts.builder()
                 .setId(UUID.randomUUID().toString())
                 .setIssuedAt(now)
-                .setSubject(subject)
-                .setIssuer(issuer)
+                .setSubject(subjectId)
+                .setIssuer("https://radtimes.com")
                 .setExpiration(exp)
-                .claim("userId", userId)
+                .claim("languageCode", languageCode)
+                .claim("email", email)
                 .signWith(signatureAlgorithm, signingKey);
 
         return builder.compact();

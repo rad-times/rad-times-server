@@ -19,8 +19,6 @@ public class PersonModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    // From oAuth token
-    private String user_id;
 
     private String first_name;
     private String last_name;

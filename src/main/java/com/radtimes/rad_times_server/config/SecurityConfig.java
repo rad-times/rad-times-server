@@ -26,7 +26,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         JwtIssuerAuthenticationManagerResolver authenticationManagerResolver = JwtIssuerAuthenticationManagerResolver
-                .fromTrustedIssuers("https://accounts.google.com", "https://www.facebook.com");
+                .fromTrustedIssuers("https://radtimes.com", "https://accounts.google.com", "https://www.facebook.com");
 
         http
                 .authorizeHttpRequests(auth -> auth
