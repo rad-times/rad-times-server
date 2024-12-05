@@ -1,10 +1,7 @@
 package com.radtimes.rad_times_server.controllers;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.radtimes.rad_times_server.model.PersonModel;
-import com.radtimes.rad_times_server.model.oauth.FacebookTokenPayload;
-import com.radtimes.rad_times_server.service.oauth.FacebookAuthenticationService;
-import com.radtimes.rad_times_server.service.oauth.GoogleAuthenticationService;
+import com.radtimes.rad_times_server.service.LoginService;
 import com.radtimes.rad_times_server.service.PersonService;
 import com.radtimes.rad_times_server.jwt_authorization.JWTUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,15 +9,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
 @RestController
 public class LoginController {
-    private final GoogleAuthenticationService googleAuthenticationService;
-    private final FacebookAuthenticationService facebookAuthenticationService;
+    private final LoginService loginService;
     private final PersonService personService;
     private final JWTUtil jwtUtil;
 
@@ -34,48 +32,37 @@ public class LoginController {
         }
     }
 
-    public LoginController(GoogleAuthenticationService googleAuthenticationService, FacebookAuthenticationService facebookAuthenticationService, PersonService personService, JWTUtil jwtUtil) {
-        this.googleAuthenticationService = googleAuthenticationService;
-        this.facebookAuthenticationService = facebookAuthenticationService;
+    public LoginController(LoginService loginService, PersonService personService, JWTUtil jwtUtil) {
+        this.loginService = loginService;
         this.personService = personService;
         this.jwtUtil = jwtUtil;
     }
 
     @GetMapping("/login")
-    public ResponseEntity<String> authenticate(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<Map<String, Object>> authenticate(HttpServletRequest request, HttpServletResponse response) {
         String authType = request.getParameter("authType");
         String authorizationHeader = request.getHeader("Authorization");
 
         if (authorizationHeader != null) {
             if (authorizationHeader.startsWith("Bearer ")) {
                 String token = authorizationHeader.substring("Bearer ".length());
+                PersonModel person = null;
                 /*
                  * Google
                  */
                 if (authType.equals(AUTH_TYPES.GOOGLE.key)) {
-                    GoogleIdToken.Payload idTokenPayload =  googleAuthenticationService.validateGoogleAuthToken(token);
-
-                    Optional<PersonModel> matchingPerson = personService.findPersonByEmail(idTokenPayload.getEmail());
-                    PersonModel person =  matchingPerson.orElseGet(() -> personService.createPersonFromGoogleData(idTokenPayload));
-
-                    if (person != null) {
-                        String userToken = jwtUtil.createJWT(person.getEmail(), person.getLanguage_code());
-                        return new ResponseEntity<>(userToken, HttpStatus.OK);
-                    }
+                    person = loginService.googleLogin(token);
                 }
                 /*
                  * Facebook
                  */
                 if (authType.equals(AUTH_TYPES.FACEBOOK.key)) {
-                    FacebookTokenPayload idTokenPayload =  facebookAuthenticationService.validateFacebookAuthToken(token);
+                    person = loginService.facebookLogin(token);
+                }
 
-                    Optional<PersonModel> matchingPerson = personService.findPersonByEmail(idTokenPayload.getEmail());
-                    PersonModel person =  matchingPerson.orElseGet(() -> personService.createPersonFromFacebookData(idTokenPayload));
-
-                    if (person != null) {
-                        String userToken = jwtUtil.createJWT(person.getEmail(), person.getLanguage_code());
-                        return new ResponseEntity<>(userToken, HttpStatus.OK);
-                    }
+                if (person != null) {
+                    Map<String, Object> tokens = loginService.createAuthTokenPair(person);
+                    return new ResponseEntity<>(tokens, HttpStatus.OK);
                 }
 
                 return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -101,5 +88,32 @@ public class LoginController {
             }
         }
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
+
+    @GetMapping("/refreshAccessToken")
+    public ResponseEntity<Map<String, Object>> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        String authorizationHeader = request.getHeader("Authorization");
+
+        if (authorizationHeader != null) {
+            if (authorizationHeader.startsWith("Bearer ")) {
+                String token = authorizationHeader.substring("Bearer ".length());
+                String email = jwtUtil.getUserEmailFromJwtToken(token);
+
+                Optional<PersonModel> person = personService.findPersonByEmail(email);
+                if (person.isPresent()) {
+                    Optional<String> savedToken = personService.getRefreshToken(email);
+
+                    if (savedToken.isPresent()) {
+                        if (savedToken.get().equals(token)) {
+                            Map<String, Object> tokens = loginService.createAuthTokenPair(person.get());
+                            return new ResponseEntity<>(tokens, HttpStatus.OK);
+                        } else {
+                            personService.clearRefreshToken(email);
+                        }
+                    }
+                }
+            }
+        }
+        return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
     }
 }

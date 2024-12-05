@@ -39,6 +39,42 @@ public class PersonService {
             throw new RuntimeException("Failed to fetch player by User ID: " + e.getMessage());
         }
     }
+
+    /**
+     * Save the user's current refresh token
+     */
+    public Optional<Void> saveRefreshToken(String token, String email) {
+        try {
+            return personRepository.saveRefreshToken(token, email);
+        } catch (Exception e) {
+            // Handle exception or log the error
+            throw new RuntimeException("Failed to save user's refresh token: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Get the user's current refresh token
+     */
+    public Optional<String> getRefreshToken(String email) {
+        try {
+            return personRepository.getRefreshToken(email);
+        } catch (Exception e) {
+            // Handle exception or log the error
+            throw new RuntimeException("Failed to get user's refresh token: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Remove the saved refresh token
+     */
+    public Optional<Void> clearRefreshToken(String email) {
+        try {
+            return personRepository.saveRefreshToken(null, email);
+        } catch (Exception e) {
+            // Handle exception or log the error
+            throw new RuntimeException("Failed to get user's refresh token: " + e.getMessage());
+        }
+    }
     /**
      * Gets the user data for the person using the application
      */
@@ -97,7 +133,9 @@ public class PersonService {
         personRepository.save(newPerson);
         return newPerson;
     }
-
+    /**
+     * Create a new person record from oAuth sign in request
+     */
     public PersonModel createPersonFromFacebookData(FacebookTokenPayload personData) {
         PersonModel newPerson = new PersonModel();
 

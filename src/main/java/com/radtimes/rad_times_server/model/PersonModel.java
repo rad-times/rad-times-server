@@ -1,5 +1,6 @@
 package com.radtimes.rad_times_server.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -19,6 +20,9 @@ public class PersonModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @JsonIgnore
+    private String refresh_token;
 
     private String first_name;
     private String last_name;
