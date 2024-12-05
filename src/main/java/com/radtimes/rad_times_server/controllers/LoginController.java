@@ -23,6 +23,7 @@ public class LoginController {
     private final GoogleAuthenticationService googleAuthenticationService;
     private final FacebookAuthenticationService facebookAuthenticationService;
     private final PersonService personService;
+    private final JWTUtil jwtUtil;
 
     private enum AUTH_TYPES {
         GOOGLE("google"),
@@ -34,14 +35,16 @@ public class LoginController {
         }
     }
 
-    public LoginController(GoogleAuthenticationService googleAuthenticationService, FacebookAuthenticationService facebookAuthenticationService, PersonService personService) {
+    public LoginController(GoogleAuthenticationService googleAuthenticationService, FacebookAuthenticationService facebookAuthenticationService, PersonService personService, JWTUtil jwtUtil) {
         this.googleAuthenticationService = googleAuthenticationService;
         this.facebookAuthenticationService = facebookAuthenticationService;
         this.personService = personService;
+        this.jwtUtil = jwtUtil;
     }
 
     @GetMapping("/login")
     public ResponseEntity<String> authenticate(HttpServletRequest request, HttpServletResponse response) {
+        log.info("=========================== login");
         String authType = request.getParameter("authType");
         String authorizationHeader = request.getHeader("Authorization");
 
@@ -58,7 +61,7 @@ public class LoginController {
                     PersonModel person =  matchingPerson.orElseGet(() -> personService.createPersonFromGoogleData(idTokenPayload));
 
                     if (person != null) {
-                        String userToken = JWTUtil.createJWT(person.getId().toString(), person.getEmail(), person.getLanguage_code());
+                        String userToken = jwtUtil.createJWT(person.getId().toString(), person.getEmail(), person.getLanguage_code());
                         return new ResponseEntity<>(userToken, HttpStatus.OK);
                     }
                 }
@@ -72,7 +75,7 @@ public class LoginController {
                     PersonModel person =  matchingPerson.orElseGet(() -> personService.createPersonFromFacebookData(idTokenPayload));
 
                     if (person != null) {
-                        String userToken = JWTUtil.createJWT(idTokenPayload.getSub(), person.getEmail(), person.getLanguage_code());
+                        String userToken = jwtUtil.createJWT(idTokenPayload.getSub(), person.getEmail(), person.getLanguage_code());
                         return new ResponseEntity<>(userToken, HttpStatus.OK);
                     }
                 }
@@ -93,9 +96,8 @@ public class LoginController {
         if (authorizationHeader != null) {
             if (authorizationHeader.startsWith("Bearer ")) {
                 String token = authorizationHeader.substring("Bearer ".length());
-                Claims claims = JWTUtil.decodeJWT(token);
-                String email = claims.getSubject();
-                if (email != null) {
+                boolean isValid = jwtUtil.validateJwtToken(token);
+                if (isValid) {
                     return new ResponseEntity<>(HttpStatus.OK);
                 }
             }
