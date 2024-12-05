@@ -1,7 +1,8 @@
 package com.radtimes.rad_times_server.config;
 
+import com.radtimes.rad_times_server.jwt_authorization.AuthTokenFilter;
+import com.radtimes.rad_times_server.jwt_authorization.JWTAuthEntryPoint;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -17,7 +18,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtIss
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
@@ -60,21 +60,23 @@ public class SecurityConfig {
             "/static/**",
             "/actuator/**",
             "/error/**",
-    };
-
-    private static final String[] WHITELIST_SOCKET_ENDPOINTS = {
             "/socket"
     };
 
-    private static final String[] API_ENDPOINTS = {
-            "/graphql",
-            "/validateToken",
-            "/api/**"
+    private static final String[] OAUTH_ENDPOINTS = {
+            "/login"
     };
 
-    private static final String[] OAUTH_ENDPOINTS = {
-            "/login/**"
-    };
+    @Bean
+    @Order(1)
+    public SecurityFilterChain whiteListFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher(WHITELIST_URLS)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(WHITELIST_URLS).permitAll()
+                );
+        return http.build();
+    }
 
     @Bean
     @Order(2)
@@ -82,8 +84,8 @@ public class SecurityConfig {
         JwtIssuerAuthenticationManagerResolver authenticationManagerResolver = JwtIssuerAuthenticationManagerResolver
                 .fromTrustedIssuers("https://accounts.google.com", "https://www.facebook.com");
 
-        http.csrf(AbstractHttpConfigurer::disable)
-                .cors(AbstractHttpConfigurer::disable)
+        http
+                .securityMatcher(OAUTH_ENDPOINTS)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(OAUTH_ENDPOINTS).authenticated()
                 )
@@ -91,4 +93,24 @@ public class SecurityConfig {
         return http.build();
     }
 
+    @Bean
+    @Order(3)
+    public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(AbstractHttpConfigurer::disable)
+                .securityMatcher("/**")
+                .authorizeHttpRequests(req -> req
+                        .anyRequest()
+                        .authenticated())
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
+                .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(
+                        authenticationJwtTokenFilter(),
+                        UsernamePasswordAuthenticationFilter.class
+                );
+
+        return http.build();
+    }
 }

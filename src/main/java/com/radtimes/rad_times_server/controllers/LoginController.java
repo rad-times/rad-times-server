@@ -6,8 +6,7 @@ import com.radtimes.rad_times_server.model.oauth.FacebookTokenPayload;
 import com.radtimes.rad_times_server.service.oauth.FacebookAuthenticationService;
 import com.radtimes.rad_times_server.service.oauth.GoogleAuthenticationService;
 import com.radtimes.rad_times_server.service.PersonService;
-import com.radtimes.rad_times_server.util.JWTUtil;
-import io.jsonwebtoken.Claims;
+import com.radtimes.rad_times_server.jwt_authorization.JWTUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +43,6 @@ public class LoginController {
 
     @GetMapping("/login")
     public ResponseEntity<String> authenticate(HttpServletRequest request, HttpServletResponse response) {
-        log.info("=========================== login");
         String authType = request.getParameter("authType");
         String authorizationHeader = request.getHeader("Authorization");
 
@@ -61,7 +59,7 @@ public class LoginController {
                     PersonModel person =  matchingPerson.orElseGet(() -> personService.createPersonFromGoogleData(idTokenPayload));
 
                     if (person != null) {
-                        String userToken = jwtUtil.createJWT(person.getId().toString(), person.getEmail(), person.getLanguage_code());
+                        String userToken = jwtUtil.createJWT(person.getEmail(), person.getLanguage_code());
                         return new ResponseEntity<>(userToken, HttpStatus.OK);
                     }
                 }
@@ -75,7 +73,7 @@ public class LoginController {
                     PersonModel person =  matchingPerson.orElseGet(() -> personService.createPersonFromFacebookData(idTokenPayload));
 
                     if (person != null) {
-                        String userToken = jwtUtil.createJWT(idTokenPayload.getSub(), person.getEmail(), person.getLanguage_code());
+                        String userToken = jwtUtil.createJWT(person.getEmail(), person.getLanguage_code());
                         return new ResponseEntity<>(userToken, HttpStatus.OK);
                     }
                 }

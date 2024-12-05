@@ -1,4 +1,4 @@
-package com.radtimes.rad_times_server.util;
+package com.radtimes.rad_times_server.jwt_authorization;
 
 import javax.crypto.SecretKey;
 
@@ -20,13 +20,12 @@ public class JWTUtil {
     private static String SECRET_KEY;
     private static Long EXPIRATION_TIME;
 
-
     public JWTUtil(@Value("${security.jwt.secret-key}") String key, @Value("${security.jwt.expiration-time}") Long time) {
         SECRET_KEY = key;
         EXPIRATION_TIME = time;
     }
 
-    public String createJWT(String subjectId, String email, PersonModel.LanguageLocale languageCode) {
+    public String createJWT(String email, PersonModel.LanguageLocale languageCode) {
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
         long expMillis = nowMillis + EXPIRATION_TIME;
@@ -35,14 +34,21 @@ public class JWTUtil {
         JwtBuilder builder = Jwts.builder()
                 .id(UUID.randomUUID().toString())
                 .issuedAt(now)
-                .subject(subjectId)
+                .subject(email)
                 .issuer("https://radtimes.com")
                 .expiration(exp)
                 .claim("languageCode", languageCode)
-                .claim("email", email)
                 .signWith(getSigningKey());
 
         return builder.compact();
+    }
+
+    public Claims decodeJWT(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     private SecretKey getSigningKey() {
@@ -56,7 +62,7 @@ public class JWTUtil {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
-                .get("email", String.class);
+                .getSubject();
     }
 
     public boolean validateJwtToken(String authToken) {

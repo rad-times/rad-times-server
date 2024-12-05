@@ -1,4 +1,4 @@
-package com.radtimes.rad_times_server.config;
+package com.radtimes.rad_times_server.jwt_authorization;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
