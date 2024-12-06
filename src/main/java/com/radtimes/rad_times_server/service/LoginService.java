@@ -6,11 +6,11 @@ import com.radtimes.rad_times_server.model.PersonModel;
 import com.radtimes.rad_times_server.model.oauth.FacebookTokenPayload;
 import com.radtimes.rad_times_server.service.oauth.FacebookAuthenticationService;
 import com.radtimes.rad_times_server.service.oauth.GoogleAuthenticationService;
+import jakarta.persistence.Entity;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Data;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -26,6 +26,12 @@ public class LoginService {
         this.personService = personService;
         this.googleAuthenticationService = googleAuthenticationService;
         this.facebookAuthenticationService = facebookAuthenticationService;
+    }
+
+    @Data
+    public static class TokenPair {
+        private String accessToken;
+        private String refreshToken;
     }
 
     /**
@@ -44,13 +50,13 @@ public class LoginService {
     /**
      * Create a response ready object with the access token and refresh token
      */
-    public Map<String, Object> createAuthTokenPair(PersonModel person) {
+    public TokenPair createAuthTokenPair(PersonModel person) {
         String userToken = jwtUtil.createJWT(person.getEmail(), person.getLanguage_code());
         String refreshToken = jwtUtil.createRefreshToken(person.getEmail());
 
-        final Map<String, Object> tokens = new HashMap<>();
-        tokens.put("accessToken", userToken);
-        tokens.put("refreshToken", refreshToken);
+        final TokenPair tokens = new TokenPair();
+        tokens.setAccessToken(userToken);
+        tokens.setRefreshToken(refreshToken);
         personService.saveRefreshToken(refreshToken, person.getEmail());
         return tokens;
     }
@@ -77,7 +83,7 @@ public class LoginService {
     /**
      * Handle request to get a new access token via a refresh token
      */
-    public Map<String, Object> getRefreshedTokenPair (String refreshToken) {
+    public TokenPair getRefreshedTokenPair (String refreshToken) {
         String email = jwtUtil.getUserEmailFromRefreshToken(refreshToken);
 
         Optional<PersonModel> person = personService.findPersonByEmail(email);

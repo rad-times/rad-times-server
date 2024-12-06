@@ -2,7 +2,6 @@ package com.radtimes.rad_times_server.controllers;
 
 import com.radtimes.rad_times_server.model.PersonModel;
 import com.radtimes.rad_times_server.service.LoginService;
-import com.radtimes.rad_times_server.service.PersonService;
 import com.radtimes.rad_times_server.jwt_authorization.JWTUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,14 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-import java.util.Optional;
-
 @Slf4j
 @RestController
 public class LoginController {
     private final LoginService loginService;
-    private final PersonService personService;
     private final JWTUtil jwtUtil;
 
     private enum AUTH_TYPES {
@@ -31,14 +26,13 @@ public class LoginController {
         }
     }
 
-    public LoginController(LoginService loginService, PersonService personService, JWTUtil jwtUtil) {
+    public LoginController(LoginService loginService, JWTUtil jwtUtil) {
         this.loginService = loginService;
-        this.personService = personService;
         this.jwtUtil = jwtUtil;
     }
 
     @GetMapping("/login")
-    public ResponseEntity<Map<String, Object>> authenticate(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<LoginService.TokenPair> authenticate(HttpServletRequest request, HttpServletResponse response) {
         String authType = request.getParameter("authType");
         String token = loginService.getBearerToken(request);
         PersonModel person = null;
@@ -58,7 +52,7 @@ public class LoginController {
             }
 
             if (person != null) {
-                Map<String, Object> tokens = loginService.createAuthTokenPair(person);
+                LoginService.TokenPair tokens = loginService.createAuthTokenPair(person);
                 return new ResponseEntity<>(tokens, HttpStatus.OK);
             }
 
@@ -82,10 +76,10 @@ public class LoginController {
     }
 
     @GetMapping("/refreshAccessToken")
-    public ResponseEntity<Map<String, Object>> refreshToken(HttpServletRequest request) {
+    public ResponseEntity<LoginService.TokenPair> refreshToken(HttpServletRequest request) {
         String refreshToken = loginService.getBearerToken(request);
         if (refreshToken != null) {
-            Map<String, Object> tokens = loginService.getRefreshedTokenPair(refreshToken);
+            LoginService.TokenPair tokens = loginService.getRefreshedTokenPair(refreshToken);
             if (tokens != null) {
                 return new ResponseEntity<>(tokens, HttpStatus.OK);
             }
