@@ -6,6 +6,7 @@ import com.radtimes.rad_times_server.model.PersonModel;
 import com.radtimes.rad_times_server.model.oauth.FacebookTokenPayload;
 import com.radtimes.rad_times_server.service.oauth.FacebookAuthenticationService;
 import com.radtimes.rad_times_server.service.oauth.GoogleAuthenticationService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -27,6 +28,22 @@ public class LoginService {
         this.facebookAuthenticationService = facebookAuthenticationService;
     }
 
+    /**
+     * Pull the token out of the request header
+     */
+    public String getBearerToken(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader != null) {
+            if (authorizationHeader.startsWith("Bearer ")) {
+                return authorizationHeader.substring("Bearer ".length());
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Create a response ready object with the access token and refresh token
+     */
     public Map<String, Object> createAuthTokenPair(PersonModel person) {
         String userToken = jwtUtil.createJWT(person.getEmail(), person.getLanguage_code());
         String refreshToken = jwtUtil.createRefreshToken(person.getEmail());
@@ -38,17 +55,45 @@ public class LoginService {
         return tokens;
     }
 
+    /**
+     * Google
+     */
     public PersonModel googleLogin(String token) {
         GoogleIdToken.Payload idTokenPayload =  googleAuthenticationService.validateGoogleAuthToken(token);
 
         Optional<PersonModel> matchingPerson = personService.findPersonByEmail(idTokenPayload.getEmail());
         return matchingPerson.orElseGet(() -> personService.createPersonFromGoogleData(idTokenPayload));
     }
-
+    /**
+     * Facebook
+     */
     public PersonModel facebookLogin(String token) {
         FacebookTokenPayload idTokenPayload =  facebookAuthenticationService.validateFacebookAuthToken(token);
 
         Optional<PersonModel> matchingPerson = personService.findPersonByEmail(idTokenPayload.getEmail());
         return matchingPerson.orElseGet(() -> personService.createPersonFromFacebookData(idTokenPayload));
+    }
+
+    /**
+     * Handle request to get a new access token via a refresh token
+     */
+    public Map<String, Object> getRefreshedTokenPair (String refreshToken) {
+        String email = jwtUtil.getUserEmailFromRefreshToken(refreshToken);
+
+        Optional<PersonModel> person = personService.findPersonByEmail(email);
+        if (person.isPresent()) {
+            Optional<String> savedToken = personService.getRefreshToken(email);
+
+            if (savedToken.isPresent()) {
+                if (savedToken.get().equals(refreshToken)) {
+                    return this.createAuthTokenPair(person.get());
+                } else {
+                    // If the stored token does not match the most recent token for the user, clear out
+                    // the stored token to force the user to re-authenticate
+                    personService.clearRefreshToken(email);
+                }
+            }
+        }
+        return null;
     }
 }

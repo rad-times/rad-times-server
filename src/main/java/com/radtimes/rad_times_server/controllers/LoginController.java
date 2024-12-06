@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -41,79 +40,57 @@ public class LoginController {
     @GetMapping("/login")
     public ResponseEntity<Map<String, Object>> authenticate(HttpServletRequest request, HttpServletResponse response) {
         String authType = request.getParameter("authType");
-        String authorizationHeader = request.getHeader("Authorization");
+        String token = loginService.getBearerToken(request);
+        PersonModel person = null;
 
-        if (authorizationHeader != null) {
-            if (authorizationHeader.startsWith("Bearer ")) {
-                String token = authorizationHeader.substring("Bearer ".length());
-                PersonModel person = null;
-                /*
-                 * Google
-                 */
-                if (authType.equals(AUTH_TYPES.GOOGLE.key)) {
-                    person = loginService.googleLogin(token);
-                }
-                /*
-                 * Facebook
-                 */
-                if (authType.equals(AUTH_TYPES.FACEBOOK.key)) {
-                    person = loginService.facebookLogin(token);
-                }
-
-                if (person != null) {
-                    Map<String, Object> tokens = loginService.createAuthTokenPair(person);
-                    return new ResponseEntity<>(tokens, HttpStatus.OK);
-                }
-
-                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-            } else {
-                return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+        if (token != null) {
+            /*
+             * Google
+             */
+            if (authType.equals(AUTH_TYPES.GOOGLE.key)) {
+                person = loginService.googleLogin(token);
             }
+            /*
+             * Facebook
+             */
+            if (authType.equals(AUTH_TYPES.FACEBOOK.key)) {
+                person = loginService.facebookLogin(token);
+            }
+
+            if (person != null) {
+                Map<String, Object> tokens = loginService.createAuthTokenPair(person);
+                return new ResponseEntity<>(tokens, HttpStatus.OK);
+            }
+
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
     }
 
     @GetMapping("/validateToken")
-    public ResponseEntity<Void> validateToken(HttpServletRequest request, HttpServletResponse response) {
-        String authorizationHeader = request.getHeader("Authorization");
-
-        if (authorizationHeader != null) {
-            if (authorizationHeader.startsWith("Bearer ")) {
-                String token = authorizationHeader.substring("Bearer ".length());
-                boolean isValid = jwtUtil.validateJwtToken(token);
-                if (isValid) {
-                    return new ResponseEntity<>(HttpStatus.OK);
-                }
+    public ResponseEntity<Void> validateToken(HttpServletRequest request) {
+        String token = loginService.getBearerToken(request);
+        if (token != null) {
+            boolean isValid = jwtUtil.validateJwtToken(token);
+            if (isValid) {
+                return new ResponseEntity<>(HttpStatus.OK);
             }
         }
+
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
     @GetMapping("/refreshAccessToken")
-    public ResponseEntity<Map<String, Object>> refreshToken(HttpServletRequest request, HttpServletResponse response) {
-        String authorizationHeader = request.getHeader("Authorization");
-
-        if (authorizationHeader != null) {
-            if (authorizationHeader.startsWith("Bearer ")) {
-                String token = authorizationHeader.substring("Bearer ".length());
-                String email = jwtUtil.getUserEmailFromRefreshToken(token);
-
-                Optional<PersonModel> person = personService.findPersonByEmail(email);
-                if (person.isPresent()) {
-                    Optional<String> savedToken = personService.getRefreshToken(email);
-
-                    if (savedToken.isPresent()) {
-                        if (savedToken.get().equals(token)) {
-                            Map<String, Object> tokens = loginService.createAuthTokenPair(person.get());
-                            return new ResponseEntity<>(tokens, HttpStatus.OK);
-                        } else {
-                            personService.clearRefreshToken(email);
-                        }
-                    }
-                }
+    public ResponseEntity<Map<String, Object>> refreshToken(HttpServletRequest request) {
+        String refreshToken = loginService.getBearerToken(request);
+        if (refreshToken != null) {
+            Map<String, Object> tokens = loginService.getRefreshedTokenPair(refreshToken);
+            if (tokens != null) {
+                return new ResponseEntity<>(tokens, HttpStatus.OK);
             }
         }
+
         return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
     }
 }
