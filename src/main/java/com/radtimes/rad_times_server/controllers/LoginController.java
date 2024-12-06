@@ -97,7 +97,7 @@ public class LoginController {
         if (authorizationHeader != null) {
             if (authorizationHeader.startsWith("Bearer ")) {
                 String token = authorizationHeader.substring("Bearer ".length());
-                String email = jwtUtil.getUserEmailFromJwtToken(token);
+                String email = jwtUtil.getUserEmailFromRefreshToken(token);
 
                 Optional<PersonModel> person = personService.findPersonByEmail(email);
                 if (person.isPresent()) {

@@ -12,7 +12,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class JWTUtilTest {
     private final String notARealKey = "lksd64lkjerg345lkjelk653gjelkjglkf345jgldkfjgoierjgoij3409tkn0eu90vn934v98n34890n3489gn4";
-    private final JWTUtil jwtUtil = new JWTUtil(notARealKey, 1000L, 5000L);
+    private final String notARealRefreshKey = "lksd64lkjerg345lkjelk653gjelkjglkf345jgldkfjgoierjgoij3409tkn0eu90vn934v98n34890n3489gn4";
+    private final JWTUtil jwtUtil = new JWTUtil(notARealKey, 1000L, notARealRefreshKey, 5000L);
 
     private final String userEmail = "app_user@email.com";
     private final PersonModel.LanguageLocale languageCode = PersonModel.LanguageLocale.EN;

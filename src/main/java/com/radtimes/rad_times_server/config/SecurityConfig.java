@@ -1,6 +1,7 @@
 package com.radtimes.rad_times_server.config;
 
 import com.radtimes.rad_times_server.jwt_authorization.AuthTokenFilter;
+import com.radtimes.rad_times_server.jwt_authorization.RefreshTokenFilter;
 import com.radtimes.rad_times_server.jwt_authorization.JWTAuthEntryPoint;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -37,6 +38,11 @@ public class SecurityConfig {
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
         return new AuthTokenFilter();
+    }
+
+    @Bean
+    public RefreshTokenFilter authenticationRefreshTokenFilter() {
+        return new RefreshTokenFilter();
     }
 
     @Bean
@@ -95,6 +101,27 @@ public class SecurityConfig {
 
     @Bean
     @Order(3)
+    public SecurityFilterChain refreshTokenChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/refreshAccessToken")
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/refreshAccessToken").authenticated()
+                )
+                .authorizeHttpRequests(req -> req
+                        .anyRequest()
+                        .authenticated())
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
+                .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(
+                        authenticationRefreshTokenFilter(),
+                        UsernamePasswordAuthenticationFilter.class
+                );
+        return http.build();
+    }
+
+    @Bean
+    @Order(4)
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
