@@ -34,7 +34,7 @@ public class JWTUtil {
     public String createJWT(String email, PersonModel.LanguageLocale languageCode) {
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
-        long expMillis = nowMillis + 30000; //EXPIRATION_TIME;
+        long expMillis = nowMillis + EXPIRATION_TIME;
         Date exp = new Date(expMillis);
 
         JwtBuilder builder = Jwts.builder()
@@ -80,28 +80,27 @@ public class JWTUtil {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String getUserEmailFromJwtToken(String token) {
+    public String getUserEmailFromToken(String token, SecretKey signingKey) {
         return Jwts.parser()
-                .verifyWith(getSigningKey())
+                .verifyWith(signingKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
+    }
+
+    public String getUserEmailFromJwtToken(String token) {
+        return getUserEmailFromToken(token, getSigningKey());
     }
 
     public String getUserEmailFromRefreshToken(String token) {
-        return Jwts.parser()
-                .verifyWith(getRefreshTokenSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
+        return getUserEmailFromToken(token, getRefreshTokenSigningKey());
     }
 
-    public boolean validateJwtToken(String authToken) {
+    public boolean validateToken(String authToken, SecretKey signingKey) {
         try {
             Jwts.parser()
-                    .verifyWith(getSigningKey())
+                    .verifyWith(signingKey)
                     .build()
                     .parseSignedClaims(authToken);
 
@@ -121,26 +120,11 @@ public class JWTUtil {
         return false;
     }
 
+    public boolean validateJwtToken(String authToken) {
+        return validateToken(authToken, getSigningKey());
+    }
+
     public boolean validateRefreshToken(String refreshToken) {
-        try {
-            Jwts.parser()
-                    .verifyWith(getRefreshTokenSigningKey())
-                    .build()
-                    .parseSignedClaims(refreshToken);
-
-            return true;
-        } catch (SignatureException e) {
-            log.error("Invalid JWT signature: {}", e.getMessage());
-        } catch (MalformedJwtException e) {
-            log.error("Invalid JWT token: {}", e.getMessage());
-        } catch (ExpiredJwtException e) {
-            log.error("JWT token is expired: {}", e.getMessage());
-        } catch (UnsupportedJwtException e) {
-            log.error("JWT token is unsupported: {}", e.getMessage());
-        } catch (IllegalArgumentException e) {
-            log.error("JWT claims string is empty: {}", e.getMessage());
-        }
-
-        return false;
+        return validateToken(refreshToken, getRefreshTokenSigningKey());
     }
 }

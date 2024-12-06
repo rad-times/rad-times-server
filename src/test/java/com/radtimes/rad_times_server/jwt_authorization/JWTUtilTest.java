@@ -54,6 +54,12 @@ public class JWTUtilTest {
         );
         String email = jwtUtil.getUserEmailFromJwtToken(jwt);
         assertEquals(userEmail, email);
+
+        String refresh = jwtUtil.createRefreshToken(
+                userEmail
+        );
+        String refreshEmail = jwtUtil.getUserEmailFromRefreshToken(refresh);
+        assertEquals(userEmail, refreshEmail);
     }
 
     @Test
@@ -67,6 +73,15 @@ public class JWTUtilTest {
 
         boolean shouldNotBeValid = jwtUtil.validateJwtToken("wejkfnwjefniwenfiuwenfiuwenf");
         assertFalse(shouldNotBeValid);
+
+        String refresh = jwtUtil.createRefreshToken(
+                userEmail
+        );
+        boolean isValidRefresh = jwtUtil.validateRefreshToken(refresh);
+        assertTrue(isValidRefresh);
+
+        boolean shouldNotBeValidRefresh = jwtUtil.validateRefreshToken("wejkfnwjefniwenfiuwenfiuwenf");
+        assertFalse(shouldNotBeValidRefresh);
     }
 
     /*
@@ -74,7 +89,6 @@ public class JWTUtilTest {
      */
     @Test
     public void createAndDecodeTamperedJWT() {
-
         PersonModel.LanguageLocale languageCode = PersonModel.LanguageLocale.EN;
 
         String jwt = jwtUtil.createJWT(
