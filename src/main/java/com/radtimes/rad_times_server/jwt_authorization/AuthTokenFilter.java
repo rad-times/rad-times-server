@@ -1,5 +1,7 @@
 package com.radtimes.rad_times_server.jwt_authorization;
 
+import com.radtimes.rad_times_server.config.SecurityConfig;
+import com.radtimes.rad_times_server.service.LoginService;
 import com.radtimes.rad_times_server.service.authorization.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -11,10 +13,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @Slf4j
 public class AuthTokenFilter extends OncePerRequestFilter {
@@ -24,13 +26,36 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
+    @Autowired
+    private LoginService loginService;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        try {
-            String jwt = parseJwt(request);
-            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-                String email = jwtUtils.getUserEmailFromJwtToken(jwt);
 
+        try {
+            String requestURI = request.getRequestURI();
+            String jwt = loginService.getBearerToken(request);
+            boolean isValidToken = false;
+            String email = null;
+
+            // For /login request and whitelisted URLs,
+            if (requestURI.equals(SecurityConfig.OAUTH_ENDPOINT) || Arrays.asList(SecurityConfig.WHITELIST_URLS).contains(requestURI)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            // Refresh token update call
+            if (requestURI.equals(SecurityConfig.REFRESH_TOKEN_ENDPOINT)) {
+                isValidToken = jwtUtils.validateRefreshToken(jwt);
+                email = isValidToken ? jwtUtils.getUserEmailFromRefreshToken(jwt) : null;
+
+            // Everything else required standard JWT token auth
+            } else {
+                isValidToken = jwtUtils.validateJwtToken(jwt);
+                email = isValidToken ? jwtUtils.getUserEmailFromJwtToken(jwt) : null;
+            }
+
+            if (isValidToken && email != null) {
                 UserDetails userDetails = userDetailsService.loadUserByEmail(email);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -43,15 +68,5 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
-    }
-
-    private String parseJwt(HttpServletRequest request) {
-        String headerAuth = request.getHeader("Authorization");
-
-        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-            return headerAuth.substring(7);
-        }
-
-        return null;
     }
 }

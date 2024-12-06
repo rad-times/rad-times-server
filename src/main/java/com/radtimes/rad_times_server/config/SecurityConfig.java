@@ -1,7 +1,6 @@
 package com.radtimes.rad_times_server.config;
 
 import com.radtimes.rad_times_server.jwt_authorization.AuthTokenFilter;
-import com.radtimes.rad_times_server.jwt_authorization.RefreshTokenFilter;
 import com.radtimes.rad_times_server.jwt_authorization.JWTAuthEntryPoint;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -33,14 +32,21 @@ public class SecurityConfig {
         this.unauthorizedHandler = unauthorizedHandler;
     }
 
+    public static final String[] WHITELIST_URLS = {
+            "/",
+            "/index.html",
+            "/static/**",
+            "/actuator/**",
+            "/error/**",
+            "/socket"
+    };
+
+    public static final String OAUTH_ENDPOINT = "/login";
+    public static final String REFRESH_TOKEN_ENDPOINT = "/refreshAccessToken";
+
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
         return new AuthTokenFilter();
-    }
-
-    @Bean
-    public RefreshTokenFilter authenticationRefreshTokenFilter() {
-        return new RefreshTokenFilter();
     }
 
     @Bean
@@ -50,19 +56,6 @@ public class SecurityConfig {
         authProvider.setUserDetailsService(userDetailsService);
         return authProvider;
     }
-
-    private static final String[] WHITELIST_URLS = {
-            "/",
-            "/index.html",
-            "/static/**",
-            "/actuator/**",
-            "/error/**",
-            "/socket"
-    };
-
-    private static final String[] OAUTH_ENDPOINTS = {
-            "/login"
-    };
 
     @Bean
     @Order(1)
@@ -82,9 +75,9 @@ public class SecurityConfig {
                 .fromTrustedIssuers("https://accounts.google.com", "https://www.facebook.com");
 
         http
-                .securityMatcher(OAUTH_ENDPOINTS)
+                .securityMatcher(OAUTH_ENDPOINT)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(OAUTH_ENDPOINTS).authenticated()
+                        .requestMatchers(OAUTH_ENDPOINT).authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.authenticationManagerResolver(authenticationManagerResolver));
         return http.build();
@@ -94,9 +87,9 @@ public class SecurityConfig {
     @Order(3)
     public SecurityFilterChain refreshTokenChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/refreshAccessToken")
+                .securityMatcher(REFRESH_TOKEN_ENDPOINT)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/refreshAccessToken").authenticated()
+                        .requestMatchers(REFRESH_TOKEN_ENDPOINT).authenticated()
                 )
                 .authorizeHttpRequests(req -> req
                         .anyRequest()
@@ -105,7 +98,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(
-                        authenticationRefreshTokenFilter(),
+                        authenticationJwtTokenFilter(),
                         UsernamePasswordAuthenticationFilter.class
                 );
         return http.build();
