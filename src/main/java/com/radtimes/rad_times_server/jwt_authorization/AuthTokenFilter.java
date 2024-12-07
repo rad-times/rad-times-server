@@ -13,7 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -32,6 +31,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private LoginService loginService;
 
+    /**
+     * Whitelist URIs use antmatch patterns. Respect them when filtering
+     */
     public boolean requestURIMatchesWhiteList(HttpServletRequest request) {
         return Arrays.stream(SecurityConfig.WHITELIST_URLS).anyMatch(testUri -> {
             AntPathRequestMatcher matcher = new AntPathRequestMatcher(testUri, null, true, new UrlPathHelper());
