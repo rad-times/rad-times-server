@@ -13,10 +13,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.util.UrlPathHelper;
 
 @Slf4j
 public class AuthTokenFilter extends OncePerRequestFilter {
@@ -29,6 +32,13 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private LoginService loginService;
 
+    public boolean requestURIMatchesWhiteList(HttpServletRequest request) {
+        return Arrays.stream(SecurityConfig.WHITELIST_URLS).anyMatch(testUri -> {
+            AntPathRequestMatcher matcher = new AntPathRequestMatcher(testUri, null, true, new UrlPathHelper());
+            return matcher.matches(request);
+        });
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
@@ -39,7 +49,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             String email = null;
 
             // For /login request and whitelisted URLs,
-            if (requestURI.equals(SecurityConfig.OAUTH_ENDPOINT) || Arrays.asList(SecurityConfig.WHITELIST_URLS).contains(requestURI)) {
+            if (requestURI.equals(SecurityConfig.OAUTH_ENDPOINT) || requestURIMatchesWhiteList(request)) {
                 filterChain.doFilter(request, response);
                 return;
             }
