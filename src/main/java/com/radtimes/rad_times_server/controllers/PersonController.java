@@ -7,6 +7,9 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,5 +40,10 @@ public class PersonController {
     @MutationMapping
     public Optional<PersonModel> togglePersonFavorite(@Argument Integer personId, @Argument Integer activeUserId, @Argument Boolean isFavorite) {
         return personService.togglePersonFavorite(personId, activeUserId, isFavorite);
+    }
+
+    @PutMapping("/users/{id}")
+    public Optional<PersonModel> updatePersonById(@PathVariable Integer id, @RequestBody PersonModel updatePayload) {
+        return personService.updatePersonById(id, updatePayload);
     }
 }

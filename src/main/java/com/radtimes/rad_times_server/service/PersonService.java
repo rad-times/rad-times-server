@@ -39,7 +39,6 @@ public class PersonService {
             throw new RuntimeException("Failed to fetch player by User ID: " + e.getMessage());
         }
     }
-
     /**
      * Save the user's current refresh token
      */
@@ -51,7 +50,6 @@ public class PersonService {
             throw new RuntimeException("Failed to save user's refresh token: " + e.getMessage());
         }
     }
-
     /**
      * Get the user's current refresh token
      */
@@ -63,7 +61,6 @@ public class PersonService {
             throw new RuntimeException("Failed to get user's refresh token: " + e.getMessage());
         }
     }
-
     /**
      * Remove the saved refresh token
      */
@@ -190,5 +187,17 @@ public class PersonService {
             // Handle exception or log the error
             throw new RuntimeException("Failed to set person as favorite: " + e.getMessage());
         }
+    }
+    /**
+     * Apply edits to a person
+     */
+    public Optional<PersonModel> updatePersonById(Integer id, PersonModel updatedPerson) {
+        PersonModel personToUpdate = personRepository.findById(id).orElse(null);
+        if (personToUpdate == null) {
+            return Optional.empty();
+        }
+        personToUpdate.setBio(updatedPerson.getBio());
+        personRepository.save(personToUpdate);
+        return Optional.of(personToUpdate);
     }
 }
