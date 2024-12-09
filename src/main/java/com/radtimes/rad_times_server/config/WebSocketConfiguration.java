@@ -12,7 +12,6 @@ import org.springframework.web.socket.server.standard.ServletServerContainerFact
 @Configuration
 @EnableWebSocket
 public class WebSocketConfiguration implements WebSocketConfigurer {
-
     private final UserCheckInService userCheckInService;
 
     public WebSocketConfiguration(UserCheckInService userCheckInService) {

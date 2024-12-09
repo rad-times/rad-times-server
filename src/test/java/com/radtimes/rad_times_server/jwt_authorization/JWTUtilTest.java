@@ -3,7 +3,7 @@ package com.radtimes.rad_times_server.jwt_authorization;
 import com.radtimes.rad_times_server.model.PersonModel;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.junit.jupiter.api.Test;
 

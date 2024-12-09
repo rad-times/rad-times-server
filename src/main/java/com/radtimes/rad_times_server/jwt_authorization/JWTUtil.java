@@ -105,7 +105,7 @@ public class JWTUtil {
                     .parseSignedClaims(authToken);
 
             return true;
-        } catch (SecurityException e) {
+        } catch (SignatureException e) {
             log.error("Invalid JWT signature: {}", e.getMessage());
         } catch (MalformedJwtException e) {
             log.error("Invalid JWT token: {}", e.getMessage());
