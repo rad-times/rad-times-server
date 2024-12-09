@@ -40,7 +40,7 @@ public class PersonModel {
     @JoinColumn(name = "person_id", referencedColumnName = "id")
     private Set<SocialMediaLinks> socials;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="location_id", referencedColumnName="id")
     private PersonLocation location;
 

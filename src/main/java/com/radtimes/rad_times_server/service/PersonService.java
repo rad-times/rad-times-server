@@ -196,7 +196,10 @@ public class PersonService {
         if (personToUpdate == null) {
             return Optional.empty();
         }
+        personToUpdate.setFirst_name(updatedPerson.getFirst_name());
+        personToUpdate.setLast_name(updatedPerson.getLast_name());
         personToUpdate.setBio(updatedPerson.getBio());
+        personToUpdate.setLocation(updatedPerson.getLocation());
         personRepository.save(personToUpdate);
         return Optional.of(personToUpdate);
     }
