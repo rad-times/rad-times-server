@@ -193,13 +193,27 @@ public class PersonService {
      */
     public Optional<PersonModel> updatePersonById(Integer id, PersonModel updatedPerson) {
         PersonModel personToUpdate = personRepository.findById(id).orElse(null);
+
         if (personToUpdate == null) {
             return Optional.empty();
         }
-        personToUpdate.setFirst_name(updatedPerson.getFirst_name());
-        personToUpdate.setLast_name(updatedPerson.getLast_name());
-        personToUpdate.setBio(updatedPerson.getBio());
-        personToUpdate.setLocation(updatedPerson.getLocation());
+
+        if (updatedPerson.getFirst_name() != null) {
+            personToUpdate.setFirst_name(updatedPerson.getFirst_name());
+        }
+
+        if (updatedPerson.getLast_name() != null) {
+            personToUpdate.setLast_name(updatedPerson.getLast_name());
+        }
+
+        if (updatedPerson.getBio() != null) {
+            personToUpdate.setBio(updatedPerson.getBio());
+        }
+
+        if (updatedPerson.getLocation() != null) {
+            personToUpdate.setLocation(updatedPerson.getLocation());
+        }
+
         personRepository.save(personToUpdate);
         return Optional.of(personToUpdate);
     }
