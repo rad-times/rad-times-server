@@ -13,9 +13,14 @@ public class ClipModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String image_url;
-    private Integer like_count;
-    private Date create_date;
+    @Column(name = "image_url")
+    private String imageUrl;
+
+    @Column(name = "like_count")
+    private String likeCount;
+
+    @Column(name = "create_date")
+    private Long createDate;
 
     private Integer location_id;
     private Integer person_id;
