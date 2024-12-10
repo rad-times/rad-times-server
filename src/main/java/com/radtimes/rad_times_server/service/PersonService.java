@@ -122,10 +122,8 @@ public class PersonService {
         newPerson.setFirst_name((String) personData.get("given_name"));
         newPerson.setLast_name((String) personData.get("family_name"));
         newPerson.setProfile_image((String) personData.get("picture"));
-
-        // Locale appears to not be sent any longer. Start the user on EN
-        newPerson.setLanguage_code(PersonModel.LanguageLocale.EN);
         newPerson.setStatus(PersonModel.UserStatus.PENDING);
+        newPerson.setLanguage_code(PersonModel.LanguageLocale.EN);
 
         personRepository.save(newPerson);
         return newPerson;
@@ -140,10 +138,8 @@ public class PersonService {
         newPerson.setFirst_name(personData.getGiven_name());
         newPerson.setLast_name(personData.getFamily_name());
         newPerson.setProfile_image(personData.getPicture());
-
-        // Locale appears to not be sent any longer. Start the user on EN
-        newPerson.setLanguage_code(PersonModel.LanguageLocale.EN);
         newPerson.setStatus(PersonModel.UserStatus.PENDING);
+        newPerson.setLanguage_code(PersonModel.LanguageLocale.EN);
 
         personRepository.save(newPerson);
         return newPerson;

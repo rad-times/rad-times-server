@@ -19,6 +19,8 @@ public class ClipComment {
 
     private String comment;
     private Date create_date;
+
+    @Enumerated(EnumType.STRING)
     private CommentStatus status;
 
     private Integer author_id;
