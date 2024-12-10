@@ -16,6 +16,8 @@ public class SocialMediaLinks {
     private Integer id;
 
     private Integer person_id;
+
+    @Enumerated(EnumType.STRING)
     private SocialType social_type;
     private String url_link;
 }

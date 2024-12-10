@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("person")
+@RequestMapping("api/person")
 public class PersonController {
     private final PersonService personService;
 

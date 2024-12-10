@@ -22,7 +22,10 @@ public class Spot {
     private String spot_image;
     private String spot_description;
     private Date last_check_in;
+
+    @Enumerated(EnumType.STRING)
     private Popularity popularity;
+
     private Integer popularity_rating_count;
     private Boolean is_public;
     private Boolean is_private;
