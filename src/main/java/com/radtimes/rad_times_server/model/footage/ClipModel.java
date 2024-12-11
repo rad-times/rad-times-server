@@ -13,11 +13,11 @@ public class ClipModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "image_url")
-    private String imageUrl;
+    @Column(name = "s3_file_name")
+    private String s3FileName;
 
     @Column(name = "like_count")
-    private String likeCount;
+    private Integer likeCount;
 
     @Column(name = "create_date")
     private Long createDate;
