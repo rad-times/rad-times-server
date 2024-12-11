@@ -29,8 +29,11 @@ public class PersonModel {
     private String email;
     private String bio;
     private String profile_image;
+
+    @Enumerated(EnumType.STRING)
     private LanguageLocale language_code;
 
+    @Enumerated(EnumType.STRING)
     private UserStatus status;
 
     @Transient

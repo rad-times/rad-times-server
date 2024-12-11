@@ -43,12 +43,10 @@ public class AmazonClientUtil {
         createBucket();
     }
 
-
     public void uploadFileToBucket(String fileName, File file, String folderToUpload) {
         logger.info("Uploading file {} to {}", fileName, folderToUpload);
         s3client.putObject(new PutObjectRequest(bucketName, folderToUpload + "/" + fileName, file));
     }
-
 
     public void deleteFileFromBucket(String filename, String folderName) {
         logger.info("Deleting file {} from {}", filename, folderName);
@@ -56,14 +54,12 @@ public class AmazonClientUtil {
         s3client.deleteObject(delObjReq);
     }
 
-
     public void deleteMultipleFilesFromBucket(List<String> files) {
         DeleteObjectsRequest delObjReq = new DeleteObjectsRequest(bucketName)
                 .withKeys(files.toArray(new String[0]));
         logger.info("Deleting files...");
         s3client.deleteObjects(delObjReq);
     }
-
 
     public File getFileFromBucket(String filename, String folderName) {
         InputStream inputStream = getFileInputStream(filename, folderName);
@@ -76,7 +72,6 @@ public class AmazonClientUtil {
         }
         return file;
     }
-
 
     public InputStream getFileInputStream(String filename, String folderName) {
         S3Object s3object = s3client.getObject(bucketName, folderName + "/" + filename);
